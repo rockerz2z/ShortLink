@@ -30,26 +30,48 @@ async def start_handler(c, m):
 async def save_shortlink(c, m):
     if len(m.command) < 3:
         await m.reply_text(
-            "<b>🕊️ Cᴏᴍᴍᴀɴᴅ Iɴᴄᴏᴍᴘʟᴇᴛᴇ :\n\nPᴜᴛ Sʜᴏʀᴛɴᴇʀ URL & API Aʟᴏɴɢ Wɪᴛʜ Tʜᴇ Cᴏᴍᴍᴀɴᴅ .\n\nEx: <code>/shortlink example.com api</code> \n ⚡ Uᴘᴅᴀᴛᴇs - @TechifyBots</b>"
+            "<b>🕊️ Incomplete Command:\n\n"
+            "Provide a shortener URL & API key along with the command.\n\n"
+            "Example: <code>/shortlink example.com api_key</code>\n"
+            "⚡ Updates - @TechifyBots</b>"
         )
         return    
+
     usr = m.from_user
-    elg = await save_data((m.command[1].replace("/", "").replace("https:", "").replace("http:", "")), m.command[2], uid=usr.id)
-    if elg:
-        await m.reply_text(f"📍 Sʜᴏʀᴛɴᴇʀ Hᴀs Bᴇᴇɴ Sᴇᴛ Sᴜᴄᴄᴇssғᴜʟʟʏ !\n\nSʜᴏʀᴛɴᴇʀ URL - `{await db.get_value('shortner', uid=usr.id)}`\nShortner API - `{await db.get_value('api', uid=usr.id)}`\n ⚡ Uᴘᴅᴀᴛᴇs - @TechifyBots")
-    else:       
-        await m.reply_text(f"🌶️ Eʀʀᴏʀ:\n\nYᴏᴜʀ Sʜᴏʀᴛʟɪɴᴋ API or URL Is Iɴᴠᴀʟɪᴅ. Pʟᴇᴀsᴇ Cʜᴇᴄᴋ Aɢᴀɪɴ !")    
-    
+    shortener_url = m.command[1]
+    api_key = m.command[2]
+
+    # Validate the URL format
+    if not shortener_url.startswith(("http://", "https://")):
+        shortener_url = f"https://{shortener_url}"  # Ensure proper formatting
+
+    try:
+        elg = await save_data(shortener_url, api_key, uid=usr.id)
+        if elg:
+            short_url = await db.get_value('shortner', uid=usr.id)
+            short_api = await db.get_value('api', uid=usr.id)
+            await m.reply_text(
+                f"📍 Shortener has been set successfully!\n\n"
+                f"Shortener URL - `{short_url}`\n"
+                f"Shortener API - `{short_api}`\n"
+                "⚡ Updates - @TechifyBots"
+            )
+        else:
+            await m.reply_text("🌶️ Error:\n\nInvalid Shortlink API or URL. Please check again!")
+    except Exception as e:
+        await m.reply_text(f"⚠️ An error occurred while saving the shortener: {e}")
+
 @Client.on_message(filters.text & filters.private)
 async def shorten_link(_, m):
     txt = m.text
-    if not ("http://" in txt or "https://" in txt):
-        await m.reply_text("Send a link that starts with http:// or https:// to shorten.")
-        return
     usr = m.from_user
+
+    if not txt.startswith(("http://", "https://")):
+        await m.reply_text("❌ Please send a valid URL that starts with http:// or https:// to shorten.")
+        return
+
     try:
         short = await short_link(link=txt, uid=usr.id)
-        msg = f"__Hᴇʀᴇ ᴀʀᴇ ʏᴏᴜʀ Sʜᴏʀᴛ Lɪɴᴋs__:\n\n<code>{short}</code>"
-        await m.reply_text(msg)
+        await m.reply_text(f"__Here is your shortened link__:\n\n<code>{short}</code>")
     except Exception as e:
-        await m.reply_text(f"Error shortening link: {e}")
+        await m.reply_text(f"⚠️ Error shortening link: {e}")
