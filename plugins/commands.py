@@ -9,7 +9,7 @@ from utilities import short_link, save_data
 async def start_handler(c, m):
     try:
         await db.add_user(m.from_user.id)
-        await bot.send_message(LOG_CHANNEL, LOG_TEXT.format(update.from_user.id, update.from_user.mention))
+        await c.send_message(LOG_CHANNEL, LOG_TEXT.format(m.from_user.id, m.from_user.mention))
 
         keyboard = InlineKeyboardMarkup(
             [
@@ -18,13 +18,14 @@ async def start_handler(c, m):
                 [InlineKeyboardButton("Developer", url="https://youtube.com/@techifybots")]
             ]
         )
-            
+
         await m.reply_text(
             START_TXT.format(m.from_user.mention),
             reply_markup=keyboard
         )
-    except:
-        pass
+    except Exception as e:
+        print(f"Error: {e}")
+
 
 @Client.on_message(filters.command('shortlink') & filters.private)
 async def save_shortlink(c, m):
