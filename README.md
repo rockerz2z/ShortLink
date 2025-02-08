@@ -41,6 +41,8 @@
 ```
 start - Check Bot Alive.
 users - Check total users.
+shortlink - To connect your shortener
+remove - To remove your shortener
 broadcast - Broadcast Massage Send All Users In Bot.
 ```
 </details>
