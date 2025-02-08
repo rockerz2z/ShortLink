@@ -5,7 +5,7 @@ API_HASH = environ.get("API_HASH", "")
 BOT_TOKEN = environ.get("BOT_TOKEN", "")
 BASE_URL = environ.get("BASE_URL", "")
 DATABASE_URL = environ.get("DATABASE_URL", "")
-
+LOG_CHANNEL = int(environ.get("LOG_CHANNEL", ""))
 
 START_TXT = '''<b>{},
 
