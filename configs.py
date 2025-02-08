@@ -16,6 +16,12 @@ START_TXT = '''<b>{},
 
 ๏ By - @TechifyBots</b>'''
 
+LOG_TEXT = '''<b>#NewUser
+    
+ID - <code>{}</code>
+
+Name - {}</b>'''
+
 HELP_TXT = '''Send Shortener URL & API along with the command.
 
 Ex: <code>/shortlink example.com api</code>
