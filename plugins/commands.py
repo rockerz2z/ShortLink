@@ -9,6 +9,8 @@ from utilities import short_link, save_data
 async def start_handler(c, m):
     try:
         await db.add_user(m.from_user.id)
+        await bot.send_message(LOG_CHANNEL, LOG_TEXT.format(update.from_user.id, update.from_user.mention))
+
         keyboard = InlineKeyboardMarkup(
             [
                 [InlineKeyboardButton("About", callback_data="about"),
