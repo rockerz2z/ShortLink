@@ -1,6 +1,6 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from database import db
+from plugins.database import db
 from configs import *
 from utilities import short_link, save_data
 
