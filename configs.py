@@ -1,10 +1,12 @@
-from os import getenv as genv
+from os import environ
 
-API_ID = genv("API_ID", "")
-API_HASH = genv("API_HASH", "")
-BOT_TOKEN = genv("BOT_TOKEN", "")
-BASE_URL = genv("BASE_URL", "")
-DATABASE_URL = genv("DATABASE_URL", "")
+API_ID = int(environ.get("API_ID", ""))
+API_HASH = environ.get("API_HASH", "")
+BOT_TOKEN = environ.get("BOT_TOKEN", "")
+BASE_URL = environ.get("BASE_URL", "")
+DATABASE_URL = environ.get("DATABASE_URL", "")
+LOG_CHANNEL = int(environ.get("LOG_CHANNEL", ""))
+
 
 START_TXT = '''<b>{},
 
