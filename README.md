@@ -31,7 +31,7 @@
 - `BOT_TOKEN` : Get From [BotFather](https://youtu.be/aJILCCXfNVM).
 - `BASE_URL` : Your app url
 - `DATABASE_URL` : Mongodb [Database](https://youtu.be/pMJpHoiu1go)
-- `SUPPORT_GROUP` : Your support group username without "@"
+- `ADMIN` : Your telegram ID.
 - `LOG_CHANNEL` : Your log channel Id.
 </details>
 
