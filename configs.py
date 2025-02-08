@@ -6,6 +6,7 @@ BOT_TOKEN = environ.get("BOT_TOKEN", "")
 BASE_URL = environ.get("BASE_URL", "")
 DATABASE_URL = environ.get("DATABASE_URL", "")
 LOG_CHANNEL = int(environ.get("LOG_CHANNEL", ""))
+ADMINS = int(environ.get("ADMINS", ""))
 
 START_TXT = '''<b>{},
 
