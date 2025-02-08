@@ -23,6 +23,9 @@ class Database:
     async def get_value(self, key, uid):
         user = await self.coll.find_one({'id': uid})
         return user.get(key, None)
-
+    
+    async def delete_value(self, key, uid):
+        """Delete a specific key (shortner or api) from the user's record."""
+        await self.coll.update_one({'id': uid}, {'$unset': {key: ""}})
 
 db = Database(DATABASE_URL, "TechifyBots")
