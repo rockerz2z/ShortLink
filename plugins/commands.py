@@ -33,7 +33,7 @@ async def start_handler(c, m):
 
 @Client.on_message(filters.command("users") & filters.user(ADMINS))
 async def users(bot, message):
-   total_users = await db.total_users_count()
+   total_users = await db.total_users()
    await message.reply_text(
         text=f'◉ ᴛᴏᴛᴀʟ ᴜꜱᴇʀꜱ: {total_users}'
    )
