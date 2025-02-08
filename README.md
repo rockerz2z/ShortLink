@@ -35,6 +35,16 @@
 - `LOG_CHANNEL` : Your log channel Id.
 </details>
 
+### 😍 COMMANDS
+
+<b><details><summary>Tap On Me For Commands</summary>
+```
+start - Check Bot Alive.
+users - Check total users.
+broadcast - Broadcast Massage Send All Users In Bot.
+```
+</details>
+
 ### 🥳 CREDIT
 
 <details><summary>Tap On Me For Credit</summary>
