@@ -1,6 +1,7 @@
 from pyrogram import Client, filters
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from plugins.database import db
+from .database import db
+from .fsub import get_fsub
 from configs import *
 from utilities import short_link, save_data
 
@@ -8,6 +9,10 @@ from utilities import short_link, save_data
 async def start_handler(c, m):
     if not m.from_user:
         return
+    
+    if IS_FSUB and not await get_fsub(c, m):
+        return  # Stop execution if user is not subscribed
+    
     user_id = m.from_user.id
     user_mention = m.from_user.mention
     try:
@@ -21,11 +26,13 @@ async def start_handler(c, m):
     except Exception as db_error:
         print(f"Database error: {db_error}")
         return
+
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("About", callback_data="about"),
          InlineKeyboardButton("Help", callback_data="help")],
         [InlineKeyboardButton("Developer", url="https://youtube.com/@techifybots")]
     ])
+    
     await m.reply_text(
         START_TXT.format(user_mention),
         reply_markup=keyboard
