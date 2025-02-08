@@ -11,11 +11,9 @@ async def start_handler(c, m):
         await db.add_user(m.from_user.id)
         keyboard = InlineKeyboardMarkup(
             [
-                [InlineKeyboardButton("Hᴇʟᴩ Mᴇɴᴜ 🔱", callback_data="help"),
-                 InlineKeyboardButton("Eᴀʀɴ Mᴏɴᴇʏ ❣️", callback_data="earn_money")],
-                [InlineKeyboardButton("Cʜᴀɴɴᴇʟ 🍩", url="https://telegram.me/TechifyBots"),
-                 InlineKeyboardButton("Rᴇᴘᴏ 🛠", url="https://github.com/TechifyBots/ShortLink")],
-                [InlineKeyboardButton("Cʟᴏsᴇ ❌", callback_data="delete")]
+                [InlineKeyboardButton("About", callback_data="help"),
+                 InlineKeyboardButton("Help", callback_data="about")],
+                [InlineKeyboardButton("Developer", url="https://youtube.com/@techifybots")]
             ]
         )
             
