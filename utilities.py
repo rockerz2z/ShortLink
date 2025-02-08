@@ -2,7 +2,7 @@ from configs import *
 from aiohttp import web
 from shortzy import Shortzy
 import asyncio, logging, aiohttp
-from database import db
+from plugins.database import db
 
 routes = web.RouteTableDef()
 
