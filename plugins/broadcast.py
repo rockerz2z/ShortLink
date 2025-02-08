@@ -20,7 +20,7 @@ async def send_msg(user_id, message):
     except Exception as e:
         return 500, f"{user_id} : {str(e)}\n"
 
-@Client.on_message(filters.private & filters.command("broadcast") & filters.user(BOT_OWNER) & filters.reply)
+@Client.on_message(filters.private & filters.command("broadcast") & filters.user(ADMINS) & filters.reply)
 async def broadcast(client, update):
     broadcast_ids = {}
     all_users_cursor = db.coll.find()  # Get all users from MongoDB
