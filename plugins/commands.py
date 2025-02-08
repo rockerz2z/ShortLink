@@ -62,6 +62,24 @@ async def save_shortlink(c, m):
     except Exception as e:
         await m.reply_text(f"⚠️ An error occurred while saving the shortener: {e}")
 
+
+@Client.on_message(filters.command('removelink') & filters.private)
+async def remove_shortlink(c, m):
+    usr = m.from_user
+    short_url = await db.get_value('shortner', uid=usr.id)
+
+    if not short_url:
+        await m.reply_text("😂 You haven't set any shortener yet. What do you want to remove?")
+        return
+
+    try:
+        await db.delete_value('shortner', uid=usr.id)
+        await db.delete_value('api', uid=usr.id)
+        await m.reply_text("✅ Successfully removed your shortener settings.")
+    except Exception as e:
+        await m.reply_text(f"⚠️ An error occurred while removing the shortener: {e}")
+
+
 @Client.on_message(filters.text & filters.private)
 async def shorten_link(_, m):
     txt = m.text
