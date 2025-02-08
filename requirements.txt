@@ -1,4 +1,4 @@
-https://codeload.github.com/KurimuzonAkuma/pyrogram/zip/refs/heads/dev
+Pyrogram
 TgCrypto
 shortzy
 aiohttp
