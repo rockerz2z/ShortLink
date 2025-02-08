@@ -31,6 +31,13 @@ async def start_handler(c, m):
         reply_markup=keyboard
     )
 
+@Client.on_message(filters.command("users") & filters.user(ADMINS))
+async def users(bot, message):
+   total_users = await db.total_users_count()
+   await message.reply_text(
+        text=f'◉ ᴛᴏᴛᴀʟ ᴜꜱᴇʀꜱ: {total_users}'
+   )
+
 @Client.on_message(filters.command('shortlink') & filters.private)
 async def save_shortlink(c, m):
     if len(m.command) < 3:
