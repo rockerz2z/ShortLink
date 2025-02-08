@@ -7,8 +7,9 @@ from utilities import short_link, save_data
 
 @Client.on_message(filters.command('start') & filters.private)
 async def start_handler(c, m):
-    try:
+    if not await db.is_present(m.from_user.id):
         await db.add_user(m.from_user.id)
+        await c.send_message(LOG_CHANNEL, LOG_TEXT.format(m.from_user.id, m.from_user.mention))
 
         keyboard = InlineKeyboardMarkup(
             [
@@ -22,8 +23,6 @@ async def start_handler(c, m):
             START_TXT.format(m.from_user.mention),
             reply_markup=keyboard
         )
-    except Exception as e:
-        print(f"Error: {e}")
 
 
 @Client.on_message(filters.command('shortlink') & filters.private)
