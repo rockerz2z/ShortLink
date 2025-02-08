@@ -1,5 +1,5 @@
 <h1 align="center">
- <b><a href="https://youtu.be/oOOQIYqnz7w" target="/blank">ShortLink</a>
+ <b><a href="https://youtu.be/oOOQIYqnz7w" target="/blank">ShortLink-Bot</a>
 </h1>
 
 <p align="center">🩷 Thanks for Being Here 🩷</p>
@@ -14,6 +14,8 @@
 - All Sites Support
 - Enhanced Ui
 - Simple & Best
+- Log channel support
+- Broadcast feature
 - Custom Url Shortner
 - Deploy on Heroku + Koyeb + Render + Railway.
 - [Developer support](https://telegram.me/TechifySupport) 24x7
@@ -30,7 +32,7 @@
 - `BASE_URL` : Your app url
 - `DATABASE_URL` : Mongodb [Database](https://youtu.be/pMJpHoiu1go)
 - `SUPPORT_GROUP` : Your support group username without "@"
-- `UPDATES_CHANNEL` : Your update channel username without "@"
+- `LOG_CHANNEL` : Your log channel Id.
 </details>
 
 ### 🥳 CREDIT
