@@ -4,26 +4,32 @@ from plugins.database import db
 from configs import *
 from utilities import short_link, save_data
 
-
 @Client.on_message(filters.command('start') & filters.private)
 async def start_handler(c, m):
-    if not await db.is_present(m.from_user.id):
-        await db.add_user(m.from_user.id)
-        await c.send_message(LOG_CHANNEL, LOG_TEXT.format(m.from_user.id, m.from_user.mention))
+    if not m.from_user:
+        return
+    user_id = m.from_user.id
+    user_mention = m.from_user.mention
+    try:
+        if not await db.is_present(user_id):
+            await db.add_user(user_id)
+            try:
+                await c.send_message(LOG_CHANNEL, LOG_TEXT.format(user_id, user_mention))
+            except Exception as log_error:
+                print(f"Failed to send log message: {log_error}")
 
-        keyboard = InlineKeyboardMarkup(
-            [
-                [InlineKeyboardButton("About", callback_data="about"),
-                 InlineKeyboardButton("Help", callback_data="help")],
-                [InlineKeyboardButton("Developer", url="https://youtube.com/@techifybots")]
-            ]
-        )
-
-        await m.reply_text(
-            START_TXT.format(m.from_user.mention),
-            reply_markup=keyboard
-        )
-
+    except Exception as db_error:
+        print(f"Database error: {db_error}")
+        return
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("About", callback_data="about"),
+         InlineKeyboardButton("Help", callback_data="help")],
+        [InlineKeyboardButton("Developer", url="https://youtube.com/@techifybots")]
+    ])
+    await m.reply_text(
+        START_TXT.format(user_mention),
+        reply_markup=keyboard
+    )
 
 @Client.on_message(filters.command('shortlink') & filters.private)
 async def save_shortlink(c, m):
