@@ -63,8 +63,8 @@ async def save_shortlink(c, m):
         await m.reply_text(f"⚠️ An error occurred while saving the shortener: {e}")
 
 
-@Client.on_message(filters.command('removelink') & filters.private)
-async def remove_shortlink(c, m):
+@Client.on_message(filters.command('remove') & filters.private)
+async def remove(c, m):
     usr = m.from_user
     short_url = await db.get_value('shortner', uid=usr.id)
 
