@@ -6,16 +6,21 @@ BOT_TOKEN = genv("BOT_TOKEN", "")
 BASE_URL = genv("BASE_URL", "")
 DATABASE_URL = genv("DATABASE_URL", "")
 
-START_TXT = '''<b>Hᴇʟʟᴏ {}, I Aᴍ ShortLink Convetor Bot.
+START_TXT = '''<b>{},
+
 ๏ I ᴄᴀɴ Cᴏɴᴠᴇʀᴛ ʏᴏᴜʀ ʟɪɴᴋs ᴛᴏ Sʜᴏʀᴛ ʟɪɴᴋs ᴜsɪɴɢ ʏᴏᴜʀ ᴀᴩɪ.
-๏ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ Hᴇʟᴩ Mᴇɴᴜ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴍʏ ᴄᴏᴍᴍᴀɴᴅs.
-๏ Uᴘᴅᴀᴛᴇs - @TechifyBots</b>'''
 
-HELP_TXT = '''Sᴇɴᴅ ᴍᴇ ᴀɴʏ ʟɪɴᴋ ɪ ᴡɪʟʟ ᴄᴏɴᴠᴇʀᴛ ɪᴛ ᴛᴏ sʜᴏʀᴛ ʟɪɴᴋ ᴜsɪɴɢ ʏᴏᴜʀ ᴀᴘɪ
-ʏᴏᴜ ᴄᴀɴ sʜᴀʀᴇ ᴛʜᴀᴛ ʟɪɴᴋ ᴀɴᴅ ᴇᴀʀɴ ᴍᴏɴᴇʏ.
-sᴇɴᴅ /ShortLink ᴛᴏ ᴋɴᴏᴡ ᴍᴏʀᴇ - Uᴘᴅᴀᴛᴇs - @TechifyBots'''
+๏ ᴄʟɪᴄᴋ ᴏɴ ᴛʜᴇ Hᴇʟᴩ ʙᴜᴛᴛᴏɴ ʙᴇʟᴏᴡ ᴛᴏ ɢᴇᴛ ɪɴғᴏʀᴍᴀᴛɪᴏɴ ᴀʙᴏᴜᴛ ᴍʏ ᴄᴏᴍᴍᴀɴᴅs.
 
-ABOUT_TXT = '''<b>╔════❰ ShortLink Convetor ❱═══❍
+๏ By - @TechifyBots</b>'''
+
+HELP_TXT = '''Send Shortener URL & API along with the command.
+
+Ex: <code>/shortlink example.com api</code>
+
+Now send me any link I will convet that link into your connected Shortener'''
+
+ABOUT_TXT = '''<b>╔════❰ ShortLink Bot ❱═══❍
 ║ ┏━━━━━━━━━❥
 ║ ┣ Mʏ ɴᴀᴍᴇ -> {}
 ║ ┣ Mʏ Oᴡɴᴇʀ -> @CallOwnerBot
