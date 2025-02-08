@@ -30,6 +30,14 @@ class ShortnerBot(Client):
         await super().stop()
         logger.info("Bot stopped")
 
+    def run(self):
+        """Override `run()` to remove `use_qr` argument"""
+        asyncio.run(self._run())  
+
+    async def _run(self):
+        """Asynchronous method to start the bot properly"""
+        await self.start()
+        await asyncio.Event().wait()  # Keeps the bot running
 
 if __name__ == '__main__':
     ShortnerBot().run()
