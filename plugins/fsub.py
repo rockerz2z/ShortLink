@@ -13,7 +13,7 @@ async def get_fsub(client, message):
             if member.status == "kicked":
                 await message.reply("**🚫 You are banned from using this bot**",
                                     reply_markup=InlineKeyboardMarkup(
-                                        [[InlineKeyboardButton("Support", user_id=int(ADMIN))]]
+                                        [[InlineKeyboardButton("Support", user_id=int(ADMINS))]]
                                     ))
             if member.status in ["left", "restricted"]:
                 not_joined.append(channel_id)
