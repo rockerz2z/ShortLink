@@ -9,7 +9,6 @@ from utilities import short_link, save_data
 async def start_handler(c, m):
     try:
         await db.add_user(m.from_user.id)
-        await c.send_message(LOG_CHANNEL, LOG_TEXT.format(m.from_user.id, m.from_user.mention))
 
         keyboard = InlineKeyboardMarkup(
             [
