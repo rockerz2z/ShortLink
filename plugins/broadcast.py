@@ -13,21 +13,25 @@ async def send_msg(user_id, message):
         await message.copy(chat_id=user_id)
         return 200, None
     except FloodWait as e:
-        await asyncio.sleep(e.value)
+        wait_time = e.value
+        if wait_time > 600:  # If flood wait is more than 10 minutes, stop retrying
+            return 500, f"{user_id} : FloodWait too long ({wait_time}s)\n"
+        await asyncio.sleep(wait_time)
         return await send_msg(user_id, message)
     except (InputUserDeactivated, UserIsBlocked):
-        return 400, f"{user_id} : error\n"
+        return 400, f"{user_id} : User Deactivated/Blocked\n"
     except Exception as e:
         return 500, f"{user_id} : {str(e)}\n"
 
 @Client.on_message(filters.private & filters.command("broadcast") & filters.user(ADMINS) & filters.reply)
 async def broadcast(c, m):
     broadcast_ids = {}
-    all_users_cursor = db.coll.find()  # Get all users from MongoDB
-    all_users = await all_users_cursor.to_list(length=None)
-
-    broadcast_msg = update.reply_to_message
-    out = await update.reply_text(text="Broadcast Started!")
+    
+    # Fetch all users from the database
+    all_users = list(db.coll.find())
+    broadcast_msg = m.reply_to_message
+    
+    out = await m.reply_text(text="Broadcast Started!")
     start_time = time.time()
     total_users = await db.total_users()
     done = 0
@@ -52,14 +56,16 @@ async def broadcast(c, m):
     completed_in = datetime.timedelta(seconds=int(time.time() - start_time))
     await asyncio.sleep(3)
     await out.delete()
+    
     if failed == 0:
-        await update.reply_text(
+        await m.reply_text(
             text=f"Broadcast completed in `{completed_in}`\n\nTotal users: {total_users}.\nDone: {done}, Success: {success}, Failed: {failed}",
             quote=True
         )
     else:
-        await update.reply_document(
+        await m.reply_document(
             document='broadcast.txt',
             caption=f"Broadcast completed in `{completed_in}`\n\nTotal users: {total_users}.\nDone: {done}, Success: {success}, Failed: {failed}"
         )
+    
     os.remove('broadcast.txt')
