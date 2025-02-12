@@ -2,7 +2,7 @@ from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 from configs import AUTH_CHANNELS
 from pyrogram.errors import RPCError
 
-async def get_fsub(bot, message):
+async def get_fsub(c, m):
     user_id = message.from_user.id
     not_joined = []
 
