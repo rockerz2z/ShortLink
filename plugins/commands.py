@@ -17,7 +17,7 @@ async def start_handler(c, m):
         await db.add_user(user_id)
         await c.send_message(LOG_CHANNEL, LOG_TEXT.format(user_id, user_mention))
 
-    if IS_FSUB and not await get_fsub(c, m):  # Fsub check after adding the user
+    if not await get_fsub(bot, message):
         return
 
     keyboard = InlineKeyboardMarkup([
@@ -34,7 +34,7 @@ async def start_handler(c, m):
 @Client.on_message(filters.command("users") & filters.user(ADMINS))
 async def users(c, m):
    total_users = await db.total_users()
-   await message.reply_text(
+   await m.reply_text(
         text=f'◉ ᴛᴏᴛᴀʟ ᴜꜱᴇʀꜱ: {total_users}'
    )
 
