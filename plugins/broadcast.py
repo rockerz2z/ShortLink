@@ -21,7 +21,7 @@ async def send_msg(user_id, message):
         return 500, f"{user_id} : {str(e)}\n"
 
 @Client.on_message(filters.private & filters.command("broadcast") & filters.user(ADMINS) & filters.reply)
-async def broadcast(client, update):
+async def broadcast(c, m):
     broadcast_ids = {}
     all_users_cursor = db.coll.find()  # Get all users from MongoDB
     all_users = await all_users_cursor.to_list(length=None)
