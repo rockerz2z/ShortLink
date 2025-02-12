@@ -17,7 +17,7 @@ async def start_handler(c, m):
         await db.add_user(user_id)
         await c.send_message(LOG_CHANNEL, LOG_TEXT.format(user_id, user_mention))
 
-    if not await get_fsub(bot, message):
+    if not await get_fsub(c, m):
         return
 
     keyboard = InlineKeyboardMarkup([
