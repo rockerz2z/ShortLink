@@ -9,22 +9,15 @@ from utilities import short_link, save_data
 async def start_handler(c, m):
     if not m.from_user:
         return
-    
-    if IS_FSUB and not await get_fsub(c, m):
-        return  # Stop execution if user is not subscribed
-    
+
     user_id = m.from_user.id
     user_mention = m.from_user.mention
-    try:
-        if not await db.is_present(user_id):
-            await db.add_user(user_id)
-            try:
-                await c.send_message(LOG_CHANNEL, LOG_TEXT.format(user_id, user_mention))
-            except Exception as log_error:
-                print(f"Failed to send log message: {log_error}")
 
-    except Exception as db_error:
-        print(f"Database error: {db_error}")
+    if not await db.is_present(user_id):
+        await db.add_user(user_id)
+        await c.send_message(LOG_CHANNEL, LOG_TEXT.format(user_id, user_mention))
+
+    if IS_FSUB and not await get_fsub(c, m):  # Fsub check after adding the user
         return
 
     keyboard = InlineKeyboardMarkup([
@@ -32,7 +25,7 @@ async def start_handler(c, m):
          InlineKeyboardButton("Help", callback_data="help")],
         [InlineKeyboardButton("Developer", url="https://youtube.com/@techifybots")]
     ])
-    
+
     await m.reply_text(
         START_TXT.format(user_mention),
         reply_markup=keyboard
