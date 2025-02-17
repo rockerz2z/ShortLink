@@ -34,7 +34,6 @@
 - `DATABASE_URL` : Mongodb [Database](https://youtu.be/pMJpHoiu1go)
 - `ADMINS` : Your telegram ID.
 - `LOG_CHANNEL` : Your log channel Id.
-- `IS_FSUB` : Set True if you want fsub.
 - `AUTH_CHANNELS` : Your fsub channel Id.
 </details>
 
