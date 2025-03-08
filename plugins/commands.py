@@ -9,23 +9,17 @@ from utilities import short_link, save_data
 async def start_handler(c, m):
     if not m.from_user:
         return
-
     user_id = m.from_user.id
     user_mention = m.from_user.mention
-
     if not await db.is_present(user_id):
         await db.add_user(user_id)
         await c.send_message(LOG_CHANNEL, LOG_TEXT.format(user_id, user_mention))
-
-    if not await get_fsub(c, m):
-        return
-
+    if IS_FSUB and not await get_fsub(c, m):return
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("About", callback_data="about"),
          InlineKeyboardButton("Help", callback_data="help")],
         [InlineKeyboardButton("Developer", url="https://youtube.com/@techifybots")]
     ])
-
     await m.reply_text(
         START_TXT.format(user_mention),
         reply_markup=keyboard
