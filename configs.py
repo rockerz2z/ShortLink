@@ -28,7 +28,9 @@ HELP_TXT = '''Send Shortener URL & API along with the command.
 
 Ex: <code>/shortlink example.com api</code>
 
-Now send me any link I will convet that link into your connected Shortener'''
+Now send me any link I will convet that link into your connected Shortener
+
+If you want to remove your Shortener then use <code>/remove</code> command.'''
 
 ABOUT_TXT = '''<b>╔════❰ ShortLink Bot ❱═══❍
 ║ ┏━━━━━━━━━❥
