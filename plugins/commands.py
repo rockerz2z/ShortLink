@@ -86,7 +86,7 @@ async def remove(c, m):
         await m.reply_text(f"⚠️ An error occurred while removing the shortener: {e}")
 
 
-@Client.on_message(filters.text & filters.private)
+@Client.on_message(filters.text & filters.private & ~filters.command(['start','shortlink', 'users', 'remove', 'broadcast']))
 async def shorten_link(_, m):
     txt = m.text
     usr = m.from_user
