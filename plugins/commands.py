@@ -85,18 +85,28 @@ async def remove(c, m):
     except Exception as e:
         await m.reply_text(f"⚠️ An error occurred while removing the shortener: {e}")
 
-
-@Client.on_message(filters.text & filters.private & ~filters.command(['start','shortlink', 'users', 'remove', 'broadcast']))
-async def shorten_link(_, m):
+@Client.on_message(filters.text & ~filters.command(['start', 'shortlink', 'remove', 'users', 'broadcast']) & (filters.private | filters.channel))
+async def shorten_link(c, m):
     txt = m.text
-    usr = m.from_user
-
-    if not txt.startswith(("http://", "https://")):
-        await m.reply_text("❌ Please send a valid URL that starts with http:// or https:// to shorten.")
-        return
+    
+    if not any(proto in txt for proto in ["http://", "https://"]):
+        return  # Ignore messages without links
 
     try:
-        short = await short_link(link=txt, uid=usr.id)
-        await m.reply_text(f"__Here is your shortened link__:\n\n<code>{short}</code>")
+        # Extract the first link found in the message
+        words = txt.split()
+        for i, word in enumerate(words):
+            if word.startswith(("http://", "https://")):
+                short = await short_link(link=word, uid=m.from_user.id if m.from_user else None)
+                words[i] = short  # Replace the link with the shortened version
+                break  # Stop after replacing the first link
+
+        new_text = " ".join(words)  # Rebuild the message with the shortened link
+
+        if m.chat.type == "private":
+            await m.reply_text(f"🔗 **Shortened Link:**\n\n<code>{short}</code>")
+        else:
+            await m.edit_text(new_text)  # Edit the message in the channel to replace the link
+
     except Exception as e:
         await m.reply_text(f"⚠️ Error shortening link: {e}")
