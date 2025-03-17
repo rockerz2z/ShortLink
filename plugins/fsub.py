@@ -1,5 +1,5 @@
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from configs import AUTH_CHANNELS, ADMINS
+from configs import *
 from pyrogram.errors import RPCError
 
 async def get_fsub(client, message):
