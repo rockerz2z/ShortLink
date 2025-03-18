@@ -27,8 +27,7 @@ async def send_msg(user_id, message):
 async def broadcast(c, m):
     broadcast_ids = {}
     
-    # Fetch all users from the database
-    all_users = list(db.coll.find())
+    all_users = [user async for user in db.coll.find()]
     broadcast_msg = m.reply_to_message
     
     out = await m.reply_text(text="Broadcast Started!")
