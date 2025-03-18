@@ -1,8 +1,14 @@
-import os, asyncio
+import os
+import asyncio
+import logging
 from configs import *
 from aiohttp import web
 from pyrogram import Client
 from utilities import web_server, ping_server
+
+# Setup Logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 class ShortnerBot(Client):
     def __init__(self):
@@ -16,13 +22,20 @@ class ShortnerBot(Client):
         )
 
     async def start(self):
-        app = web.AppRunner(await web_server())
-        await app.setup()
+        # Properly initialize the web server
+        app = await web_server()
+        runner = web.AppRunner(app)
+        await runner.setup()
+
         ba = "0.0.0.0"
         port = int(os.getenv("PORT", 8080))
-        await web.TCPSite(app, ba, port).start()
+        site = web.TCPSite(runner, ba, port)
+        await site.start()
+
         await super().start()
         logger.info("Bot started successfully")
+
+        # Start ping server in the background
         asyncio.create_task(ping_server())
 
     async def stop(self, *args):
