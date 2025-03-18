@@ -1,7 +1,6 @@
 import os, asyncio
 from configs import *
 from aiohttp import web
-from logger import logger
 from pyrogram import Client
 from utilities import web_server, ping_server
 
