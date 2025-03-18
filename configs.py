@@ -1,15 +1,18 @@
-from os import environ
+import os
 
-API_ID = int(environ.get("API_ID", "123456"))  # Replace with a valid default ID
-API_HASH = environ.get("API_HASH", "")
-BOT_TOKEN = environ.get("BOT_TOKEN", "")
-BASE_URL = environ.get("BASE_URL", "")
-DATABASE_URL = environ.get("DATABASE_URL", "")
-LOG_CHANNEL = int(environ.get("LOG_CHANNEL", "0"))  # Ensure valid default
-ADMINS = int(environ.get("ADMINS", "0"))  # Ensure valid default
-IS_FSUB = environ.get("IS_FSUB", "True").lower() == "true"
-AUTH_CHANNELS = environ.get("AUTH_CHANNEL", "")
+API_ID = int(os.environ.get("API_ID", "123456"))  # Default to a valid integer
+API_HASH = os.environ.get("API_HASH", "")
+BOT_TOKEN = os.environ.get("BOT_TOKEN", "")
+BASE_URL = os.environ.get("BASE_URL", "")
+DATABASE_URL = os.environ.get("DATABASE_URL", "")
+LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", "0"))  # Default to 0 if not set
+ADMINS = int(os.environ.get("ADMINS", "0"))  # Default to 0 if not set
+IS_FSUB = os.environ.get("IS_FSUB", "True").lower() == "true"
+
+# Convert AUTH_CHANNEL to a list of integers
+AUTH_CHANNELS = os.environ.get("AUTH_CHANNEL", "")
 AUTH_CHANNELS = [int(channel_id) for channel_id in AUTH_CHANNELS.split() if channel_id.strip()]
+
 
 
 
