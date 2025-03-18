@@ -85,9 +85,9 @@ async def remove(c, m):
     except Exception as e:
         await m.reply_text(f"⚠️ An error occurred while removing the shortener: {e}")
 
-@Client.on_message(filters.text & ~filters.command(['start', 'shortlink', 'remove', 'users', 'broadcast']) & (filters.private | filters.channel))
+@Client.on_message(filters.text | filters.caption & ~filters.command(['start', 'shortlink', 'remove', 'users', 'broadcast']) & (filters.private | filters.channel))
 async def shorten_link(c, m):
-    txt = m.text
+    txt = m.text or m.caption
     if not any(proto in txt for proto in ["http://", "https://"]):
         await m.reply_text("❌ Please send a valid link that starts with http:// or https://.")
         return
@@ -104,6 +104,8 @@ async def shorten_link(c, m):
 
         if m.chat.type == "private":
             await m.reply_text(f"✅ Here is your shortened link:\n\n<code>{short}</code>")
+        elif m.caption:
+            await m.edit_caption(new_text)
         else:
             await m.edit_text(new_text)
 
