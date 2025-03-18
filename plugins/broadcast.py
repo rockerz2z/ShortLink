@@ -6,7 +6,7 @@ import aiofiles
 from pyrogram import Client, filters
 from pyrogram.errors import FloodWait, InputUserDeactivated, UserIsBlocked
 from configs import *
-from plugins.database import db
+from .database import db
 
 async def send_msg(user_id, message):
     try:
