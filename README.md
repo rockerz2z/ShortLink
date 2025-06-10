@@ -28,14 +28,13 @@
 
 <details><summary>Tap On Me For Environment Variable</summary>
 
-- `API_ID` : Get From [Here](https://youtu.be/RdMY6Lqfi9w)
-- `API_HASH` : Get From [Here](https://youtu.be/RdMY6Lqfi9w)
-- `BOT_TOKEN` : Get From [BotFather](https://youtu.be/aJILCCXfNVM).
-- `BASE_URL` : Your app url
-- `DATABASE_URL` : Mongodb [Database](https://youtu.be/pMJpHoiu1go)
-- `ADMINS` : Your telegram ID.
-- `LOG_CHANNEL` : Your log channel Id.
-- `AUTH_CHANNELS` : Your fsub channel Id.
+- `API_ID` : Get From [Here](https://youtu.be/y5FwAobQ-Kc)
+- `API_HASH` : Get From [Here](https://youtu.be/y5FwAobQ-Kc)
+- `BOT_TOKEN` : Get From [BotFather](https://youtu.be/aJILCCXfNVM)
+- `ADMIN` : Your Telegram User ID
+- `DB_URI` : MongoDB Database get from [here](https://youtu.be/j8LIuM7vv18)
+- `LOG_CHANNEL` : Your Log channel ID.
+- `AUTH_CHANNELS` : Your FSUB channel ID.
 </details>
 
 ### 😍 COMMANDS
