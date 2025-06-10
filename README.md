@@ -15,9 +15,10 @@
 - Enhanced Ui
 - Simple & Best
 - Log channel support
-- Auth channel support
+- Multi Fsub channel
 - Broadcast feature
 - Custom Url Shortner
+- tiny, isgd, vgd support
 - Deploy on Heroku + Koyeb + Render + Railway.
 - [Developer support](https://telegram.me/TechifySupport) 24x7
 </details>
@@ -49,25 +50,13 @@ broadcast - Broadcast Massage Send All Users In Bot.
 ```
 </details>
 
-### 🥳 CREDIT
+### 💞 CREDIT
 
-<details><summary>Tap On Me For Credit</summary>
+- [TechifyBots](https://github.com/TechifyBots)
 
+### 😇 [SUPPORT](https://techifybots.github.io/PayWeb)
 
-💝 Credit Goes To [TechifyBots](https://github.com/TechifyBots)
-
-💘 Base Repo Credit [TamilanBotsZ](https://github.com/TamilanBotsZ)
-
-💖 And Thank You So Much To All Who Help In This Journey.
-</details>
-
-### 💕 CONTACT DEVELOPER
-
-- [Rahul](https://telegram.me/TechifySupport)
-
-### ☕ BUY ME A COFFEE
-- [PayPal](https://paypal.me/TechifyBots)
-- [UPI](https://TechifyBots.github.io/Donate)
+### 🥳 [DEVELOPER](https://telegram.me/TechifySupport)
 
 ### 📌 NOTE
 
