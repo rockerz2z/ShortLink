@@ -42,11 +42,17 @@
 
 <b><details><summary>Tap On Me For Commands</summary>
 ```
-start - Check Bot Alive.
-users - Check total users.
-shortlink - To connect your shortener
-remove - To remove your shortener
+start - Check Bot Alive or no.
+stats - Check bot stats.
+shortlink - To connect your custom shortener.
+info - To check your info.
+ban - To ban users.
+unban - To unban users.
+banlist - To check banned users list.
 broadcast - Broadcast Massage Send All Users In Bot.
+tiny - To short url using tiny
+isgd - To short url using isgd
+vgd - To short url using vgd
 ```
 </details>
 
