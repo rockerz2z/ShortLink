@@ -1,0 +1,12 @@
+pyrofork>=2.3.63
+TgCrypto
+shortzy
+motor
+requests
+httpx
+Flask
+gunicorn
+Jinja2
+werkzeug
+itsdangerous
+aiohttp
