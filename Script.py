@@ -17,7 +17,7 @@ ID: {}"""
 Lɪʙʀᴀʀʏ: Pʏʀᴏɢʀᴀᴍ 📚
 Lᴀɴɢᴜᴀɢᴇ: Pʏᴛʜᴏɴ 🐍
 Sᴇʀᴠᴇʀ: Rᴇɴᴅᴇʀ 🌐
-Bᴜɪʟᴅ Sᴛᴀᴛᴜs: V1.3 🚀
+Bᴜɪʟᴅ Sᴛᴀᴛᴜs: V3 🚀
 Sᴏᴜʀᴄᴇ Cᴏᴅᴇ: Aᴠᴀɪʟᴀʙʟᴇ (Fʀᴇᴇ) 💻 
 
 <blockquote>ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ : <a href='https://telegram.me/TechifyRahul'>ʀᴀʜᴜʟ</a></blockquote></b>"""
