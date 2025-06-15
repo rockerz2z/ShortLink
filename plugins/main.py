@@ -40,7 +40,7 @@ async def shorten_with_vgd(url):
         r = await client.get(f"https://v.gd/create.php?format=simple&url={url}")
         return r.text.strip()
 
-async def process_shortener(message: Message, shortener_func, name: str):
+async def process_shortener(client: Client, message: Message, shortener_func, name: str):
     if await tb.is_user_banned(message.from_user.id):
         await message.reply(
             "**🚫 You are banned from using this bot**",
@@ -49,15 +49,20 @@ async def process_shortener(message: Message, shortener_func, name: str):
             )
         )
         return
-    if IS_FSUB and not await get_fsub(message.client, message):return
+
+    if IS_FSUB and not await get_fsub(client, message):  # Use the passed client
+        return
+
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2:
         await message.reply_text(f"❗ Send a valid URL.\nUsage: `/{name} https://youtube.com/@techifybots`", quote=True)
         return
+
     url = parts[1].strip()
     if not url.startswith(("http://", "https://")):
         await message.reply_text("❗ URL must start with http:// or https://", quote=True)
         return
+
     try:
         short_url = await shortener_func(url)
         reply_markup = InlineKeyboardMarkup(
@@ -129,15 +134,18 @@ async def showinfo(c, m):
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
 
 @Client.on_message(filters.command("tiny") & filters.private)
-async def tiny_handler(c, m): await process_shortener(m, shorten_with_tiny, "tiny")
+async def tiny_handler(c, m): 
+    await process_shortener(c, m, shorten_with_tiny, "tiny")
 
 @Client.on_message(filters.command("isgd") & filters.private)
-async def isgd_handler(c, m): await process_shortener(m, shorten_with_isgd, "isgd")
+async def isgd_handler(c, m): 
+    await process_shortener(c, m, shorten_with_isgd, "isgd")
 
 @Client.on_message(filters.command("vgd") & filters.private)
-async def vgd_handler(c, m): await process_shortener(m, shorten_with_vgd, "vgd")
+async def vgd_handler(c, m): 
+    await process_shortener(c, m, shorten_with_vgd, "vgd")
 
-@Client.on_message(filters.text & filters.private)
+@Client.on_message(filters.text & filters.private & ~filters.command(["tiny", "isgd", "vgd"]))
 async def shorten_link(_, m):
     if await tb.is_user_banned(m.from_user.id):
         await m.reply("**🚫 You are banned from using this bot**",
