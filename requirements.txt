@@ -1,4 +1,5 @@
 pyrofork>=2.3.63
+pytz
 TgCrypto
 shortzy
 motor
