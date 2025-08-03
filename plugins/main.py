@@ -4,6 +4,7 @@ from pyrogram.types import *
 import httpx
 import asyncio
 from config import *
+import random
 from .db import tb
 from shortzy import Shortzy
 from config import *
