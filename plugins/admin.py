@@ -10,16 +10,23 @@ def parse_button_markup(text: str):
     lines = text.split("\n")
     buttons = []
     final_text_lines = []
-
     for line in lines:
-        match = re.fullmatch(r"\[(.+?)\]\((https?://[^\s]+)\)", line.strip())
-        if match:
-            buttons.append([InlineKeyboardButton(match[1], url=match[2])])
+        row = []
+        parts = line.split("||")
+        is_button_line = True
+        for part in parts:
+            match = re.fullmatch(r"\[(.+?)\]\((https?://[^\s]+)\)", part.strip())
+            if match:
+                row.append(InlineKeyboardButton(match[1], url=match[2]))
+            else:
+                is_button_line = False
+                break
+        if is_button_line and row:
+            buttons.append(row)
         else:
             final_text_lines.append(line)
-
     return InlineKeyboardMarkup(buttons) if buttons else None, "\n".join(final_text_lines).strip()
-
+
 @Client.on_message(filters.command("stats") & filters.private & filters.user(ADMIN))
 async def total_users(client, message):
     try:
