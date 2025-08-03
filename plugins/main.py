@@ -2,6 +2,7 @@ from pyrogram import Client, filters
 from pyrogram.errors import *
 from pyrogram.types import *
 import httpx
+import asyncio
 from config import *
 from .db import tb
 from shortzy import Shortzy
