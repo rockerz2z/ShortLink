@@ -30,23 +30,50 @@ async def save_data(tst_url, tst_api, user_id):
 async def start_handler(c, m):
     try:
         if await tb.is_user_banned(m.from_user.id):
-            await m.reply("**🚫 You are banned from using this bot**",
-                          reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
+            await m.reply(
+                "**🚫 You are banned from using this bot**",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("Support", user_id=int(ADMIN))]
+                ])
+            )
             return
+
         if await tb.get_user(m.from_user.id) is None:
             await tb.add_user(m.from_user.id, m.from_user.first_name)
-            await c.send_message(LOG_CHANNEL, text.LOG.format(m.from_user.mention, m.from_user.id))
-        await m.reply_text(
-            text.START.format(m.from_user.mention),
-            disable_web_page_preview=True,
+
+        bot = await c.get_me()
+
+        await c.send_message(
+            LOG_CHANNEL,
+            text.LOG.format(
+                m.from_user.id,
+                getattr(m.from_user, "dc_id", "N/A"),
+                m.from_user.first_name or "N/A",
+                f"@{m.from_user.username}" if m.from_user.username else "N/A",
+                bot.username
+            )
+        )
+
+        if IS_FSUB and not await get_fsub(c, m):
+            return
+
+        await m.reply_photo(
+            photo=random.choice(PICS),
+            caption=text.START.format(m.from_user.mention),
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("ᴀʙᴏᴜᴛ", callback_data="about"),
-                 InlineKeyboardButton("ʜᴇʟᴘ", callback_data="help")],
-                [InlineKeyboardButton("♻ ᴅᴇᴠᴇʟᴏᴘᴇʀ ♻", user_id=int(ADMIN))]
+                [
+                    InlineKeyboardButton("ᴀʙᴏᴜᴛ", callback_data="about"),
+                    InlineKeyboardButton("ʜᴇʟᴘ", callback_data="help")
+                ],
+                [
+                    InlineKeyboardButton("♻ ᴅᴇᴠᴇʟᴏᴘᴇʀ ♻", user_id=int(ADMIN))
+                ]
             ])
         )
+
     except Exception as u:
-        await m.reply(f"{str(u)}")
+        await m.reply(f"**❌ Error:** `{str(u)}`")
+
 
 @Client.on_message(filters.command('shortlink') & filters.private)
 async def save_shortlink(c, m):
