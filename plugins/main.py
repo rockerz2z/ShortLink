@@ -25,38 +25,6 @@ async def save_data(tst_url, tst_api, user_id):
     else:
         return False
 
-async def process_shortener(client: Client, message: Message, shortener_func, name: str):
-    if await tb.is_user_banned(message.from_user.id):
-        await message.reply(
-            "**🚫 You are banned from using this bot**",
-            reply_markup=InlineKeyboardMarkup(
-                [[InlineKeyboardButton("👮 Support", user_id=int(ADMIN))]]
-            )
-        )
-        return
-
-    if IS_FSUB and not await get_fsub(client, message):  # Use the passed client
-        return
-
-    parts = message.text.split(maxsplit=1)
-    if len(parts) < 2:
-        await message.reply_text(f"❗ Send a valid URL.\nUsage: `/{name} https://youtube.com/@techifybots`", quote=True)
-        return
-
-    url = parts[1].strip()
-    if not url.startswith(("http://", "https://")):
-        await message.reply_text("❗ URL must start with http:// or https://", quote=True)
-        return
-
-    try:
-        short_url = await shortener_func(url)
-        reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton("❌ Close", callback_data="close")]]
-        )
-        await message.reply_text(f"🔗 **{name.upper()} Short Link:**\n➡️ `{short_url}`", reply_markup=reply_markup)
-    except Exception as e:
-        await message.reply_text(f"❌ Failed to shorten using {name}: {e}", quote=True)
-
 @Client.on_message(filters.command('start') & filters.private)
 async def start_handler(c, m):
     try:
