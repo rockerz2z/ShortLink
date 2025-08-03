@@ -38,12 +38,9 @@ async def start_handler(c, m):
                 ])
             )
             return
-
         if await tb.get_user(m.from_user.id) is None:
             await tb.add_user(m.from_user.id, m.from_user.first_name)
-
         bot = await c.get_me()
-
         await c.send_message(
             LOG_CHANNEL,
             text.LOG.format(
@@ -54,27 +51,23 @@ async def start_handler(c, m):
                 bot.username
             )
         )
-
         if IS_FSUB and not await get_fsub(c, m):
             return
-
         await m.reply_photo(
             photo=random.choice(PICS),
             caption=text.START.format(m.from_user.mention),
             reply_markup=InlineKeyboardMarkup([
                 [
-                    InlineKeyboardButton("ᴀʙᴏᴜᴛ", callback_data="about"),
-                    InlineKeyboardButton("ʜᴇʟᴘ", callback_data="help")
+                    InlineKeyboardButton("ℹ️ 𝖠𝖻𝗈𝗎𝗍", callback_data="about"),
+                    InlineKeyboardButton("📚 𝖧𝖾𝗅𝗉", callback_data="help")
                 ],
                 [
-                    InlineKeyboardButton("♻ ᴅᴇᴠᴇʟᴏᴘᴇʀ ♻", user_id=int(ADMIN))
+                    InlineKeyboardButton("👨‍💻 𝖣𝖾𝗏𝖾𝗅𝗈𝗉𝖾𝗋 👨‍💻", user_id=int(ADMIN))
                 ]
             ])
         )
-
     except Exception as u:
         await m.reply(f"**❌ Error:** `{str(u)}`")
-
 
 @Client.on_message(filters.command('shortlink') & filters.private)
 async def save_shortlink(c, m):
@@ -96,11 +89,9 @@ async def save_shortlink(c, m):
     )
     if elg:
         await m.reply_text(
-            f"**✅ Shortener has been set successfully!\n\nShortener URL - {await tb.get_value('shortner', user_id=usr.id)}\nShortener API - {await tb.get_value('api', user_id=usr.id)}\n\n>❤️‍🔥 By: @TechifyBots**",
-            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
+            f"**✅ Shortener has been set successfully!\n\nShortener URL - {await tb.get_value('shortner', user_id=usr.id)}\nShortener API - {await tb.get_value('api', user_id=usr.id)}\n\n>❤️‍🔥 By: @TechifyBots**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
     else:       
-        await m.reply_text("**⚠️ Error:\n\nYour Shortlink API or URL is invalid, please check again!**",
-                           reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
+        await m.reply_text("**⚠️ Error:\n\nYour Shortlink API or URL is invalid, please check again!**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
 
 @Client.on_message(filters.command('info') & filters.private)
 async def showinfo(c, m):
@@ -160,7 +151,7 @@ async def tiny_handler(client, message):
     except Exception as e:
         await message.reply_text(f"❌ Failed to shorten using TinyURL: {e}", quote=True)
 
-@Client.on_message(filters.text & filters.private & ~filters.command(["tiny"]))
+@Client.on_message(filters.text & filters.private & ~filters.command(["tiny", "stats", " broadcast "]))
 async def shorten_link(_, m):
     if await tb.is_user_banned(m.from_user.id):
         await m.reply("**🚫 You are banned from using this bot**",
