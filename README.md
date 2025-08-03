@@ -18,7 +18,7 @@
 - Multi Fsub channel
 - Broadcast feature
 - Custom Url Shortner
-- tiny urlbsupport
+- Tiny Url support
 - Deploy on Heroku + Koyeb + Render + Railway.
 - [Developer support](https://telegram.me/TechifySupport) 24x7
 </details>
@@ -51,8 +51,6 @@ unban - To unban users.
 banlist - To check banned users list.
 broadcast - Broadcast Massage Send All Users In Bot.
 tiny - To short url using tiny
-isgd - To short url using isgd
-vgd - To short url using vgd
 ```
 </details>
 
