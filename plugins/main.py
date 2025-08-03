@@ -25,21 +25,6 @@ async def save_data(tst_url, tst_api, user_id):
     else:
         return False
 
-async def shorten_with_tiny(url):
-    async with httpx.AsyncClient() as client:
-        r = await client.get(f"http://tinyurl.com/api-create.php?url={url}")
-        return r.text.strip()
-
-async def shorten_with_isgd(url):
-    async with httpx.AsyncClient() as client:
-        r = await client.get(f"https://is.gd/create.php?format=simple&url={url}")
-        return r.text.strip()
-
-async def shorten_with_vgd(url):
-    async with httpx.AsyncClient() as client:
-        r = await client.get(f"https://v.gd/create.php?format=simple&url={url}")
-        return r.text.strip()
-
 async def process_shortener(client: Client, message: Message, shortener_func, name: str):
     if await tb.is_user_banned(message.from_user.id):
         await message.reply(
@@ -134,18 +119,51 @@ async def showinfo(c, m):
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
 
 @Client.on_message(filters.command("tiny") & filters.private)
-async def tiny_handler(c, m): 
-    await process_shortener(c, m, shorten_with_tiny, "tiny")
+async def tiny_handler(client, message):
+    # Validate input
+    parts = message.text.split(maxsplit=1)
+    if len(parts) < 2:
+        await message.reply_text(
+            "❗ Send a valid URL.\n\n◉ `/tiny https://youtube.com/@techifybots`",
+            quote=True
+        )
+        return
 
-@Client.on_message(filters.command("isgd") & filters.private)
-async def isgd_handler(c, m): 
-    await process_shortener(c, m, shorten_with_isgd, "isgd")
+    url = parts[1].strip()
+    if not url.startswith(("http://", "https://")):
+        await message.reply_text(
+            "❗ URL must start with http:// or https://",
+            quote=True
+        )
+        return
 
-@Client.on_message(filters.command("vgd") & filters.private)
-async def vgd_handler(c, m): 
-    await process_shortener(c, m, shorten_with_vgd, "vgd")
+    try:
+        async with httpx.AsyncClient() as client_httpx:
+            resp = await client_httpx.get(f"http://tinyurl.com/api-create.php?url={url}")
+            short_url = resp.text.strip()
+        if not short_url.startswith("http"):
+            await message.reply_text(
+                "❌ TinyURL could not shorten this link. Try a different URL.",
+                quote=True
+            )
+            return
 
-@Client.on_message(filters.text & filters.private & ~filters.command(["tiny", "isgd", "vgd"]))
+        reply_markup = InlineKeyboardMarkup(
+            [[InlineKeyboardButton("❌ Close", callback_data="close")]]
+        )
+        sent = await message.reply_text(
+            f"🔗 **ShortLink:**\n\n`{short_url}`",
+            reply_markup=reply_markup
+        )
+        await asyncio.sleep(300)
+        try:
+            await sent.delete()
+        except Exception:
+            pass
+    except Exception as e:
+        await message.reply_text(f"❌ Failed to shorten using TinyURL: {e}", quote=True)
+
+@Client.on_message(filters.text & filters.private & ~filters.command(["tiny"]))
 async def shorten_link(_, m):
     if await tb.is_user_banned(m.from_user.id):
         await m.reply("**🚫 You are banned from using this bot**",
