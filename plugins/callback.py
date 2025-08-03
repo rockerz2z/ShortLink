@@ -9,9 +9,8 @@ async def callback_query_handler(client, query: CallbackQuery):
         await query.message.delete()
 
     elif query.data == "help":
-        await query.message.edit_text(
-            text.HELP.format(query.from_user.mention),
-            disable_web_page_preview=True,
+        await query.message.edit_caption(
+            caption=text.HELP.format(query.from_user.mention),
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("ᴜᴩᴅᴀᴛᴇꜱ", url="https://telegram.me/Techifybots"),
                  InlineKeyboardButton("ꜱᴜᴩᴩᴏʀᴛ", url="https://telegram.me/TechifySupport")],
@@ -21,9 +20,8 @@ async def callback_query_handler(client, query: CallbackQuery):
         )
 
     elif query.data == "about":
-        await query.message.edit_text(
-            text.ABOUT,
-            disable_web_page_preview=True,
+        await query.message.edit_caption(
+            caption=text.ABOUT,
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("💥 ʀᴇᴘᴏ", url="https://github.com/TechifyBots/ShortLink"),
                  InlineKeyboardButton("👨‍💻 ᴏᴡɴᴇʀ", user_id=int(ADMIN))],
@@ -33,9 +31,8 @@ async def callback_query_handler(client, query: CallbackQuery):
         )
 
     elif query.data == "back":
-        await query.message.edit_text(
-            text.START.format(query.from_user.mention),
-            disable_web_page_preview=True,
+        await query.message.edit_caption(
+            caption=text.START.format(query.from_user.mention),
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("ᴀʙᴏᴜᴛ", callback_data="about"),
                  InlineKeyboardButton("ʜᴇʟᴘ", callback_data="help")],
