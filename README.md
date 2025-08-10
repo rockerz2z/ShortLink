@@ -19,6 +19,7 @@
 - Broadcast feature
 - Custom Url Shortner
 - Tiny Url support
+- Maintenance Mode
 - Deploy on Heroku + Koyeb + Render + Railway.
 - [Developer support](https://telegram.me/TechifySupport) 24x7
 </details>
@@ -49,6 +50,7 @@ info - To check your info.
 ban - To ban users.
 unban - To unban users.
 banlist - To check banned users list.
+maintenance - Toggle maintenance mode
 broadcast - Broadcast Massage Send All Users In Bot.
 tiny - To short url using tiny
 ```
