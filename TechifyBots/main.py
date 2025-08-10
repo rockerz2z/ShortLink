@@ -10,6 +10,7 @@ from shortzy import Shortzy
 from config import *
 from .fsub import get_fsub
 from Script import text
+from .maintenance import get_maintenance
 
 async def short_link(link, user_id):
     usite = await tb.get_value("shortner", user_id=user_id)
@@ -108,7 +109,8 @@ async def showinfo(c, m):
 
 @Client.on_message(filters.command("tiny") & filters.private)
 async def tiny_handler(client, message):
-    # Validate input
+    if await get_maintenance() and message.from_user.id != ADMIN:
+        return await message.reply_text("**🛠️ Bot is Under Maintenance**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2:
         await message.reply_text(
@@ -153,6 +155,8 @@ async def tiny_handler(client, message):
 
 @Client.on_message(filters.text & filters.private & ~filters.command(["tiny", "stats", " broadcast "]))
 async def shorten_link(_, m):
+    if await get_maintenance() and m.from_user.id != ADMIN:
+        return await m.reply_text("**🛠️ Bot is Under Maintenance**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))    
     if await tb.is_user_banned(m.from_user.id):
         await m.reply("**🚫 You are banned from using this bot**",
                       reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
