@@ -20,7 +20,7 @@ async def short_link(link, user_id):
 
 async def save_data(tst_url, tst_api, user_id):
     shortzy = Shortzy(api_key=tst_api, base_site=tst_url)
-    link=f"https://telegram.me/TechifyBots"
+    link=f"https://telegram.me/R2K_Bots"
     short = await shortzy.convert(link)        
     if short.startswith("http"):
         await tb.set_shortner(user_id=user_id, shortner=tst_url, api=tst_api)
@@ -79,7 +79,7 @@ async def save_shortlink(c, m):
     if IS_FSUB and not await get_fsub(c, m): return
     if len(m.command) < 3:
         await m.reply_text(
-            "**❌ Please provide both the Shortener URL and API key along with the command.\n\nExample: `/shortlink example.com your_api_key`\n\n>❤️‍🔥 By: @TechifyBots**",
+            "**❌ Please provide both the Shortener URL and API key along with the command.\n\nExample: `/shortlink example.com your_api_key`\n\n>❤️‍🔥 By: @R2K_Bots**",
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
         return
     usr = m.from_user
@@ -90,7 +90,7 @@ async def save_shortlink(c, m):
     )
     if elg:
         await m.reply_text(
-            f"**✅ Shortener has been set successfully!\n\nShortener URL - {await tb.get_value('shortner', user_id=usr.id)}\nShortener API - {await tb.get_value('api', user_id=usr.id)}\n\n>❤️‍🔥 By: @TechifyBots**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
+            f"**✅ Shortener has been set successfully!\n\nShortener URL - {await tb.get_value('shortner', user_id=usr.id)}\nShortener API - {await tb.get_value('api', user_id=usr.id)}\n\n>❤️‍🔥 By: @R2K_Bots**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
     else:       
         await m.reply_text("**⚠️ Error:\n\nYour Shortlink API or URL is invalid, please check again!**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
 
@@ -104,7 +104,7 @@ async def showinfo(c, m):
     site = await tb.get_value('shortner', user_id=usr.id)
     api = await tb.get_value('api', user_id=usr.id)
     await m.reply_text(
-        f"**Your Information\n\n👤 User: {usr.mention}\n🆔 User ID: `{usr.id}`\n\n🌐 Connected Site: `{site}`\n🔗 Connected API: `{api}`\n\n>❤️‍🔥 By: @TechifyBots**",
+        f"**Your Information\n\n👤 User: {usr.mention}\n🆔 User ID: `{usr.id}`\n\n🌐 Connected Site: `{site}`\n🔗 Connected API: `{api}`\n\n>❤️‍🔥 By: @R2K_Bots**",
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
 
 @Client.on_message(filters.command("tiny") & filters.private)
@@ -114,7 +114,7 @@ async def tiny_handler(client, message):
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2:
         await message.reply_text(
-            "❗ Send a valid URL.\n\n◉ `/tiny https://youtube.com/@techifybots`",
+            "❗ Send a valid URL.\n\n◉ `/tiny https://youtube.com/@R2K_Bots`",
             quote=True
         )
         return
@@ -172,7 +172,7 @@ async def shorten_link(_, m):
     usr = m.from_user
     try:
         short = await short_link(link=txt, user_id=usr.id)
-        msg = f"**✨ 𝐘𝐨𝐮𝐫 𝐒𝐡𝐨𝐫𝐭 𝐋𝐢𝐧𝐤 𝐢𝐬 𝐑𝐞𝐚𝐝𝐲!\n\n🔗 𝗟𝗶𝗻𝗸: <code>{short}</code>\n\n>❤️‍🔥 By: @TechifyBots**"
+        msg = f"**✨ 𝐘𝐨𝐮𝐫 𝐒𝐡𝐨𝐫𝐭 𝐋𝐢𝐧𝐤 𝐢𝐬 𝐑𝐞𝐚𝐝𝐲!\n\n🔗 𝗟𝗶𝗻𝗸: <code>{short}</code>\n\n>❤️‍🔥 By: @R2K_Bots**"
         await m.reply_text(msg, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
     except Exception as e:
         await m.reply_text(f"Error shortening link: {e}")
