@@ -35,7 +35,7 @@ async def start_handler(c, m):
             await m.reply(
                 "**🚫 You are banned from using this bot**",
                 reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton("Support", user_id=int(ADMIN))]
+                    [InlineKeyboardButton("Support", url="https://t.me/ProfessorR2K")]
                 ])
             )
             return
@@ -63,7 +63,7 @@ async def start_handler(c, m):
                     InlineKeyboardButton("📚 𝖧𝖾𝗅𝗉", callback_data="help")
                 ],
                 [
-                    InlineKeyboardButton("👨‍💻 𝖣𝖾𝗏𝖾𝗅𝗈𝗉𝖾𝗋 👨‍💻", user_id=int(ADMIN))
+                    [InlineKeyboardButton("👨‍💻 𝖣𝖾𝗏𝖾𝗅𝗈𝗉𝖾𝗋 👨‍💻", url="https://t.me/ProfessorR2K")]
                 ]
             ])
         )
@@ -74,7 +74,7 @@ async def start_handler(c, m):
 async def save_shortlink(c, m):
     if await tb.is_user_banned(m.from_user.id):
         await m.reply("**🚫 You are banned from using this bot**",
-                      reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
+                      reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", url="https://t.me/ProfessorR2K")]]))
         return
     if IS_FSUB and not await get_fsub(c, m): return
     if len(m.command) < 3:
@@ -98,7 +98,7 @@ async def save_shortlink(c, m):
 async def showinfo(c, m):
     if await tb.is_user_banned(m.from_user.id):
         await m.reply("**🚫 You are banned from using this bot**",
-                      reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
+                      reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", url="https://t.me/ProfessorR2K")]]))
         return
     usr = m.from_user
     site = await tb.get_value('shortner', user_id=usr.id)
@@ -110,7 +110,7 @@ async def showinfo(c, m):
 @Client.on_message(filters.command("tiny") & filters.private)
 async def tiny_handler(client, message):
     if await get_maintenance() and message.from_user.id != ADMIN:
-        return await message.reply_text("**🛠️ Bot is Under Maintenance**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
+        return await message.reply_text("**🛠️ Bot is Under Maintenance**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", url="https://t.me/ProfessorR2K")]]))
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2:
         await message.reply_text(
@@ -155,12 +155,12 @@ async def tiny_handler(client, message):
 
 @Client.on_message(filters.text & filters.private & ~filters.command(["tiny", "stats", " broadcast "]))
 async def shorten_link(_, m):
-    if await get_maintenance() and m.from_user.id != ADMIN:
+    if await get_maintenance() and m.from_user.id != url="https://t.me/ProfessorR2K":
         await m.delete()
-        return await m.reply_text("**🛠️ Bot is Under Maintenance**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))    
+        return await m.reply_text("**🛠️ Bot is Under Maintenance**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", url="https://t.me/ProfessorR2K")]]))    
     if await tb.is_user_banned(m.from_user.id):
         await m.reply("**🚫 You are banned from using this bot**",
-                      reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
+                      reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", url="https://t.me/ProfessorR2K")]]))
         return
     if IS_FSUB and not await get_fsub(_, m): return
     txt = m.text
