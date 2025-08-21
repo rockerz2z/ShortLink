@@ -11,7 +11,8 @@ async def callback_query_handler(client, query: CallbackQuery):
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("ℹ️ 𝖠𝖻𝗈𝗎𝗍", callback_data="about"),
                  InlineKeyboardButton("📚 𝖧𝖾𝗅𝗉", callback_data="help")],
-                [InlineKeyboardButton("👨‍💻 𝖣𝖾𝗏𝖾𝗅𝗈𝗉𝖾𝗋 👨‍💻", user_id=int(ADMIN))]
+                [InlineKeyboardButton("👨‍💻 𝖣𝖾𝗏𝖾𝗅𝗈𝗉𝖾𝗋 👨‍💻", url="https://t.me/ProfessorR2K")]
+
             ])
         )
 
@@ -30,7 +31,7 @@ async def callback_query_handler(client, query: CallbackQuery):
         await query.message.edit_caption(
             caption=text.ABOUT,
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("👨‍💻 𝖣𝖾𝗏𝖾𝗅𝗈𝗉𝖾𝗋 👨‍💻", user_id=int(ADMIN))],
+                [InlineKeyboardButton("👨‍💻 𝖣𝖾𝗏𝖾𝗅𝗈𝗉𝖾𝗋 👨‍💻", url="https://t.me/ProfessorR2K")],
                 [InlineKeyboardButton("↩️ 𝖡𝖺𝖼𝗄", callback_data="start"),
                  InlineKeyboardButton("❌ 𝖢𝗅𝗈𝗌𝖾", callback_data="close")]
             ])
