@@ -19,8 +19,8 @@ async def callback_query_handler(client, query: CallbackQuery):
         await query.message.edit_caption(
             caption=text.HELP,
             reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("📢 𝖴𝗉𝖽𝖺𝗍𝖾𝗌", url="https://telegram.me/Techifybots"),
-                 InlineKeyboardButton("💬 𝖲𝗎𝗉𝗉𝗈𝗋𝗍", url="https://telegram.me/TechifySupport")],
+                [InlineKeyboardButton("📢 𝖴𝗉𝖽𝖺𝗍𝖾𝗌", url="https://telegram.me/R2K_Bots"),
+                 InlineKeyboardButton("💬 𝖲𝗎𝗉𝗉𝗈𝗋𝗍", url="https://telegram.me/ProfessorR2K")],
                 [InlineKeyboardButton("↩️ 𝖡𝖺𝖼𝗄", callback_data="start"),
                  InlineKeyboardButton("❌ 𝖢𝗅𝗈𝗌𝖾", callback_data="close")]
             ])
