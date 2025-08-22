@@ -37,20 +37,20 @@ class Bot(Client):
         except Exception as e:
             print(f"Web server error: {e}")
 
-        await super().start()
-        self.me = await self.get_me()   # ✅ save it globally for stop()
-        print(f"Bot Started as {self.me.first_name}")
 
+        await super().start()
+        me = await self.get_me()
+        print(f"Bot Started as {me.first_name}")
         if isinstance(ADMIN, int):
             try:
-                await self.send_message(ADMIN, f"**{self.me.first_name} is started...**")
+                await self.send_message(ADMIN, f"**{me.first_name} is started...**")
             except Exception as e:
                 print(f"Error sending message to admin: {e}")
         if LOG_CHANNEL:
             try:
                 now = datetime.now(timezone("Asia/Kolkata"))
                 msg = (
-                    f"**{self.me.mention} is restarted!**\n\n"
+                    f"**{me.mention} is restarted!**\n\n"
                     f"📅 Date : `{now.strftime('%d %B, %Y')}`\n"
                     f"⏰ Time : `{now.strftime('%I:%M:%S %p')}`\n"
                     f"🌐 Timezone : `Asia/Kolkata`"
@@ -61,5 +61,6 @@ class Bot(Client):
 
     async def stop(self, *args):
         await super().stop()
-        print(f"{self.me.first_name} Bot stopped.")   # ✅ fixed
+        print(f"{me.first_name} Bot stopped.")
 
+Bot().run()
