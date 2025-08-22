@@ -155,7 +155,7 @@ async def tiny_handler(client, message):
 
 @Client.on_message(filters.text & filters.private & ~filters.command(["tiny", "stats", " broadcast "]))
 async def shorten_link(_, m):
-    if await get_maintenance() and m.from_user.id != url="https://t.me/ProfessorR2K":
+    if await get_maintenance() and m.from_user.id != 6221939103:
         await m.delete()
         return await m.reply_text("**🛠️ Bot is Under Maintenance**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", url="https://t.me/ProfessorR2K")]]))    
     if await tb.is_user_banned(m.from_user.id):
