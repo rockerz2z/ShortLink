@@ -1,6 +1,7 @@
 from pyrogram import Client, filters
 from pyrogram.errors import *
 from pyrogram.types import *
+from pyrogram.enums import ParseMode
 import httpx
 import asyncio
 import random
@@ -97,6 +98,7 @@ async def save_shortlink(c, m):
         await m.reply_text(
             "**❌ Please provide both the Shortener URL and API key along with the command.**\n\n"
             "Example:\n`/shortlink example.com your_api_key`\n\n>❤️‍🔥 By: @R2K_Bots",
+            parse_mode=ParseMode.MARKDOWN,
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("❌ Close", callback_data="close")]
             ])
@@ -116,6 +118,7 @@ async def save_shortlink(c, m):
             f"🌐 URL - `{await tb.get_value('shortner', user_id=usr.id)}`\n"
             f"🔑 API - `{await tb.get_value('api', user_id=usr.id)}`\n\n"
             ">❤️‍🔥 By: @R2K_Bots",
+            parse_mode=ParseMode.MARKDOWN,
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("❌ Close", callback_data="close")]
             ])
@@ -152,6 +155,7 @@ async def showinfo(c, m):
         f"🌐 Connected Site: `{site}`\n"
         f"🔗 Connected API: `{api}`\n\n"
         ">❤️‍🔥 By: @R2K_Bots",
+        parse_mode=ParseMode.MARKDOWN,
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("❌ Close", callback_data="close")]
         ])
@@ -172,7 +176,8 @@ async def tiny_handler(client, message):
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2:
         return await message.reply_text(
-            "❗ Send a valid URL.\n\nExample:\n`/tiny https://youtube.com/@R2K_Bots`"
+            "❗ Send a valid URL.\n\nExample:\n`/tiny https://youtube.com/@R2K_Bots`",
+            parse_mode=ParseMode.MARKDOWN
         )
 
     url = parts[1].strip()
@@ -203,7 +208,7 @@ async def tiny_handler(client, message):
 
 # ---------- Auto Shorten ----------
 @Client.on_message(filters.text & filters.private & ~filters.command(["tiny", "stats", "broadcast"]))
-async def shorten_link(_, m):
+async def shorten_link_handler(_, m):
     if await get_maintenance() and m.from_user.id != ADMIN:
         await m.delete()
         return await m.reply_text(
@@ -232,7 +237,7 @@ async def shorten_link(_, m):
         if not m.command or len(m.command) < 2:
             return await m.reply_text(
                 "⚠️ Please provide a valid link to shorten.\n\nUsage: `/short https://example.com`",
-                parse_mode="MarkdownV2"
+                parse_mode=ParseMode.MARKDOWN
             )
         url = m.command[1]
 
@@ -252,7 +257,7 @@ async def shorten_link(_, m):
         )
         await m.reply_text(
             msg,
-            parse_mode="HTML",
+            parse_mode=ParseMode.HTML,
             disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("❌ Close", callback_data="close")]
@@ -260,4 +265,4 @@ async def shorten_link(_, m):
         )
 
     except Exception as e:
-        await m.reply_text(f"⚠️ Error shortening link: `{e}`", parse_mode="Markdown")
+        await m.reply_text(f"⚠️ Error shortening link: `{e}`", parse_mode=ParseMode.MARKDOWN)
