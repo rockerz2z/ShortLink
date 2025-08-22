@@ -1,61 +1,40 @@
 class text(object):
-    START = """{},  
+  START = """{},
 
-<b>👋 Welcome to ShortLink Bot!</b>  
+𝘐 𝘤𝘢𝘯 𝘤𝘰𝘯𝘷𝘦𝘳𝘵 𝘺𝘰𝘶𝘳 𝘭𝘪𝘯𝘬𝘴 𝘪𝘯𝘵𝘰 𝘴𝘩𝘰𝘳𝘵 𝘭𝘪𝘯𝘬𝘴.
 
-I can instantly <b>convert your long URLs into short, easy-to-share links</b>.  
+𝘊𝘭𝘪𝘤𝘬 𝘵𝘩𝘦 𝘏𝘦𝘭𝘱 𝘣𝘶𝘵𝘵𝘰𝘯 𝘣𝘦𝘭𝘰𝘸 𝘵𝘰 𝘨𝘦𝘵 𝘮𝘰𝘳𝘦 𝘪𝘯𝘧𝘰.
 
-🔹 Simple, Fast & Reliable  
-🔹 Supports Multiple Shorteners  
-🔹 Personal Dashboard for Links  
+<blockquote><b>‣ ᴍᴀɪɴᴛᴀɪɴᴇᴅ ʙʏ : <a href='https://telegram.me/ProfessorR2K'>ProfessorR2K</a></b></blockquote>"""
 
-Click the <b>Help</b> button below to explore all features.  
+  LOG = """👁️‍🗨️ 𝘜𝘚𝘌𝘙 𝘋𝘌𝘛𝘈𝘐𝘓𝘚
 
-<blockquote><b>‣ Maintained by : <a href='https://t.me/ProfessorR2K'>ProfessorR2K</a></b></blockquote>"""
+○ 𝘐𝘋 : <code>{}</code>
+○ 𝘋𝘊 : {}
+○ 𝘍𝘪𝘳𝘴𝘵 𝘕𝘢𝘮𝘦 : {}
+○ 𝘜𝘴𝘦𝘳𝘕𝘢𝘮𝘦 : {}
 
-    LOG = """👁️‍🗨️ <b>User Joined!</b>  
+𝘉𝘺 = @{}"""
+  
+  ABOUT = """<b>‣ ᴍʏ ɴᴀᴍᴇ : <a href='https://telegram.me/ProfessorR2K'>sʜᴏʀᴛʟɪɴᴋ ʙᴏᴛ</a>
+‣ ʟɪʙʀᴀʀʏ : <a href='https://docs.pyrogram.org/'>ᴘʏʀᴏɢʀᴀᴍ</a> 
+‣ ᴅᴀᴛᴀʙᴀsᴇ : <a href='https://www.mongodb.com/'>ᴍᴏɴɢᴏᴅʙ</a>
+‣ ʟᴀɴɢᴜᴀɢᴇ : <a href='https://www.python.org/download/releases/3.0/'>ᴘʏᴛʜᴏɴ 𝟹</a> 
+‣ ʙᴏᴛ sᴇʀᴠᴇʀ : <a href='https://www.koyeb.com/'>ᴋᴏʏᴇʙ</a>
+‣ ᴄʀᴇᴀᴛᴇᴅ ʙʏ : <a href='https://telegram.me/ProfessorR2K'>ProfessorR2K</a></b>"""
+  
+  HELP = """<b>🚀 𝘚𝘩𝘰𝘳𝘵𝘭𝘪𝘯𝘬 𝘉𝘰𝘵 𝘎𝘶𝘪𝘥𝘦</b>
 
-○ <b>ID :</b> <code>{}</code>  
-○ <b>DC :</b> {}  
-○ <b>First Name :</b> {}  
-○ <b>Username :</b> {}  
+𝘌𝘢𝘴𝘪𝘭𝘺 𝘴𝘩𝘰𝘳𝘵𝘦𝘯 𝘢𝘯𝘺 𝘭𝘪𝘯𝘬 𝘶𝘴𝘪𝘯𝘨 𝘤𝘰𝘮𝘮𝘢𝘯𝘥𝘴:
 
-<b>By :</b> @{}"""
+<b>𝘌𝘹𝘢𝘮𝘱𝘭𝘦:</b>
+◉ `/tiny https://youtube.com`
 
-    ABOUT = """<b>🤖 Bot Information</b>  
+<b>🔧 𝘚𝘦𝘵 𝘠𝘰𝘶𝘳 𝘗𝘳𝘦𝘧𝘦𝘳𝘳𝘦𝘥 𝘚𝘩𝘰𝘳𝘵𝘦𝘯𝘦𝘳:</b>  
+◉ `/shortlink [site] [api_key]`
 
-‣ <b>My Name :</b> <a href='https://t.me/R2K_Bots'>ShortLink Bot</a>  
-‣ <b>Library :</b> <a href='https://docs.pyrogram.org/'>Pyrogram</a>  
-‣ <b>Database :</b> <a href='https://www.mongodb.com/'>MongoDB</a>  
-‣ <b>Language :</b> <a href='https://www.python.org/'>Python 3</a>  
-‣ <b>Bot Server :</b> <a href='https://www.koyeb.com/'>Koyeb</a>  
-‣ <b>Created By :</b> <a href='https://t.me/ProfessorR2K'>OWNER</a>  
+<b>📋 𝘊𝘩𝘦𝘤𝘬 𝘊𝘶𝘳𝘳𝘦𝘯𝘵 𝘚𝘦𝘵𝘶𝘱:</b>  
+◉ /info
 
-<b>✨ Special Features:</b>  
-✔ Multiple URL Shortener Support  
-✔ Automatic Link Detection  
-✔ Custom Shortener Setup  
-✔ Logs & Analytics Support"""
-
-    HELP = """<b>🚀 ShortLink Bot Guide</b>  
-
-Easily shorten any link with commands:  
-
-<b>🔹 Example:</b>  
-◉ `/tiny https://youtube.com/`  
-◉ Just send any link directly — I’ll auto-short it!  
-
-<b>🔧 Setup Your Preferred Shortener:</b>  
-◉ `/shortlink [site] [api_key]`  
-
-<b>📋 Check Your Current Setup:</b>  
-◉ `/info`  
-
-<b>💡 Extra Features:</b>  
-◉ `/mylinks` → Get all your shortened links  
-◉ `/stats` → Track how many links you shortened  
-◉ `/reset` → Reset your API key or shortener  
-◉ `/help` → Show this guide again  
-
-Once configured, <b>all links you send will be auto-shortened</b> using your chosen service.  
-You can update or change your shortener anytime."""  
+𝘖𝘯𝘤𝘦 𝘴𝘦𝘵, 𝘢𝘭𝘭 𝘭𝘪𝘯𝘬𝘴 𝘺𝘰𝘶 𝘴𝘦𝘯𝘥 𝘸𝘪𝘭𝘭 𝘣𝘦 𝘢𝘶𝘵𝘰-𝘴𝘩𝘰𝘳𝘵𝘦𝘯𝘦𝘥 𝘸𝘪𝘵𝘩 𝘺𝘰𝘶𝘳 𝘤𝘩𝘰𝘴𝘦𝘯 𝘴𝘦𝘳𝘷𝘪𝘤𝘦.
+𝘠𝘰𝘶 𝘤𝘢𝘯 𝘶𝘱𝘥𝘢𝘵𝘦 𝘺𝘰𝘶𝘳 𝘴𝘩𝘰𝘳𝘵𝘦𝘯𝘦𝘳 𝘢𝘯𝘺𝘵𝘪𝘮𝘦 𝘶𝘴𝘪𝘯𝘨 𝘵𝘩𝘦 𝘴𝘢𝘮𝘦 𝘤𝘰𝘮𝘮𝘢𝘯𝘥."""
