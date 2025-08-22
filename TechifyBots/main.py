@@ -37,7 +37,7 @@ async def start_handler(c, m):
     try:
         if await tb.is_user_banned(m.from_user.id):
             await m.reply(
-                "**🚫 You are banned from using this bot**",
+                "🚫 You are banned from using this bot",
                 reply_markup=InlineKeyboardMarkup([
                     [InlineKeyboardButton("Support", url="https://t.me/ProfessorR2K")]
                 ])
@@ -76,7 +76,7 @@ async def start_handler(c, m):
             ])
         )
     except Exception as u:
-        await m.reply(f"**❌ Error:** `{str(u)}`")
+        await m.reply(f"❌ Error: <code>{str(u)}</code>", parse_mode=ParseMode.HTML)
 
 
 # ---------- Save Shortlink ----------
@@ -84,7 +84,7 @@ async def start_handler(c, m):
 async def save_shortlink(c, m):
     if await tb.is_user_banned(m.from_user.id):
         await m.reply(
-            "**🚫 You are banned from using this bot**",
+            "🚫 You are banned from using this bot",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("Support", url="https://t.me/ProfessorR2K")]
             ])
@@ -96,9 +96,9 @@ async def save_shortlink(c, m):
 
     if len(m.command) < 3:
         await m.reply_text(
-            "**❌ Please provide both the Shortener URL and API key along with the command.**\n\n"
-            "Example:\n`/shortlink example.com your_api_key`\n\n>❤️‍🔥 By: @R2K_Bots",
-            parse_mode=ParseMode.MARKDOWN,
+            "❌ Please provide both the Shortener URL and API key along with the command.\n\n"
+            "Example:\n<code>/shortlink example.com your_api_key</code>\n\n❤️‍🔥 By: @R2K_Bots",
+            parse_mode=ParseMode.HTML,
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("❌ Close", callback_data="close")]
             ])
@@ -114,18 +114,18 @@ async def save_shortlink(c, m):
 
     if elg:
         await m.reply_text(
-            f"**✅ Shortener has been set successfully!**\n\n"
-            f"🌐 URL - `{await tb.get_value('shortner', user_id=usr.id)}`\n"
-            f"🔑 API - `{await tb.get_value('api', user_id=usr.id)}`\n\n"
-            ">❤️‍🔥 By: @R2K_Bots",
-            parse_mode=ParseMode.MARKDOWN,
+            f"✅ Shortener has been set successfully!\n\n"
+            f"🌐 URL - <code>{await tb.get_value('shortner', user_id=usr.id)}</code>\n"
+            f"🔑 API - <code>{await tb.get_value('api', user_id=usr.id)}</code>\n\n"
+            "❤️‍🔥 By: @R2K_Bots",
+            parse_mode=ParseMode.HTML,
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("❌ Close", callback_data="close")]
             ])
         )
     else:       
         await m.reply_text(
-            "**⚠️ Error: Your Shortlink API or URL is invalid, please check again!**",
+            "⚠️ Error: Your Shortlink API or URL is invalid, please check again!",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("❌ Close", callback_data="close")]
             ])
@@ -137,7 +137,7 @@ async def save_shortlink(c, m):
 async def showinfo(c, m):
     if await tb.is_user_banned(m.from_user.id):
         await m.reply(
-            "**🚫 You are banned from using this bot**",
+            "🚫 You are banned from using this bot",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("Support", url="https://t.me/ProfessorR2K")]
             ])
@@ -149,13 +149,13 @@ async def showinfo(c, m):
     api = await tb.get_value('api', user_id=usr.id)
 
     await m.reply_text(
-        f"**Your Information**\n\n"
+        f"📌 Your Information\n\n"
         f"👤 User: {usr.mention}\n"
-        f"🆔 User ID: `{usr.id}`\n\n"
-        f"🌐 Connected Site: `{site}`\n"
-        f"🔗 Connected API: `{api}`\n\n"
-        ">❤️‍🔥 By: @R2K_Bots",
-        parse_mode=ParseMode.MARKDOWN,
+        f"🆔 User ID: <code>{usr.id}</code>\n\n"
+        f"🌐 Connected Site: <code>{site}</code>\n"
+        f"🔗 Connected API: <code>{api}</code>\n\n"
+        "❤️‍🔥 By: @R2K_Bots",
+        parse_mode=ParseMode.HTML,
         reply_markup=InlineKeyboardMarkup([
             [InlineKeyboardButton("❌ Close", callback_data="close")]
         ])
@@ -167,7 +167,7 @@ async def showinfo(c, m):
 async def tiny_handler(client, message):
     if await get_maintenance() and message.from_user.id != ADMIN:
         return await message.reply_text(
-            "**🛠️ Bot is Under Maintenance**",
+            "🛠️ Bot is Under Maintenance",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("Support", url="https://t.me/ProfessorR2K")]
             ])
@@ -176,8 +176,8 @@ async def tiny_handler(client, message):
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2:
         return await message.reply_text(
-            "❗ Send a valid URL.\n\nExample:\n`/tiny https://youtube.com/@R2K_Bots`",
-            parse_mode=ParseMode.MARKDOWN
+            "❗ Send a valid URL.\n\nExample:\n<code>/tiny https://youtube.com/@R2K_Bots</code>",
+            parse_mode=ParseMode.HTML
         )
 
     url = parts[1].strip()
@@ -195,7 +195,11 @@ async def tiny_handler(client, message):
         reply_markup = InlineKeyboardMarkup([
             [InlineKeyboardButton("❌ Close", callback_data="close")]
         ])
-        sent = await message.reply_text(f"🔗 **ShortLink:**\n\n`{short_url}`", reply_markup=reply_markup)
+        sent = await message.reply_text(
+            f"🔗 ShortLink:\n\n<code>{short_url}</code>",
+            parse_mode=ParseMode.HTML,
+            reply_markup=reply_markup
+        )
 
         await asyncio.sleep(300)
         try:
@@ -203,7 +207,7 @@ async def tiny_handler(client, message):
         except:
             pass
     except Exception as e:
-        await message.reply_text(f"❌ Failed to shorten using TinyURL: {e}")
+        await message.reply_text(f"❌ Failed to shorten using TinyURL: <code>{e}</code>", parse_mode=ParseMode.HTML)
 
 
 # ---------- Auto Shorten ----------
@@ -212,7 +216,7 @@ async def shorten_link_handler(_, m):
     if await get_maintenance() and m.from_user.id != ADMIN:
         await m.delete()
         return await m.reply_text(
-            "**🛠️ Bot is Under Maintenance**",
+            "🛠️ Bot is Under Maintenance",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("Support", url="https://t.me/ProfessorR2K")]
             ])
@@ -220,7 +224,7 @@ async def shorten_link_handler(_, m):
 
     if await tb.is_user_banned(m.from_user.id):
         return await m.reply(
-            "**🚫 You are banned from using this bot**",
+            "🚫 You are banned from using this bot",
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("Support", url="https://t.me/ProfessorR2K")]
             ])
@@ -236,8 +240,8 @@ async def shorten_link_handler(_, m):
     if m.text and m.text.startswith("/short"):
         if not m.command or len(m.command) < 2:
             return await m.reply_text(
-                "⚠️ Please provide a valid link to shorten.\n\nUsage: `/short https://example.com`",
-                parse_mode=ParseMode.MARKDOWN
+                "⚠️ Please provide a valid link to shorten.\n\nUsage: <code>/short https://example.com</code>",
+                parse_mode=ParseMode.HTML
             )
         url = m.command[1]
 
@@ -265,4 +269,4 @@ async def shorten_link_handler(_, m):
         )
 
     except Exception as e:
-        await m.reply_text(f"⚠️ Error shortening link: `{e}`", parse_mode=ParseMode.MARKDOWN)
+        await m.reply_text(f"⚠️ Error shortening link: <code>{e}</code>", parse_mode=ParseMode.HTML)
