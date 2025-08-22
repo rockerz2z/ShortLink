@@ -224,24 +224,27 @@ async def shorten_link(_, m):
     if IS_FSUB and not await get_fsub(_, m):
         return
 
-    txt = m.text
-    if txt.startswith("/"):
-        return
-
-    if not ("http://" in txt or "https://" in txt):
-        return await m.reply_text("Please send a valid link to shorten.")
-
     usr = m.from_user
+    txt = m.text.strip() if m.text else ""
 
-    # validate input
-    if len(m.command) < 2:
-        await m.reply_text("⚠️ Please send a valid link to shorten.\n\nUsage: `/short <your-link>`", parse_mode="MarkdownV2")
-        return
+    # Case 1: If it's a command (/short <link>)
+    if m.text and m.text.startswith("/short"):
+        if not m.command or len(m.command) < 2:
+            return await m.reply_text(
+                "⚠️ Please provide a valid link to shorten.\n\nUsage: `/short https://example.com`",
+                parse_mode="MarkdownV2"
+            )
+        url = m.command[1]
 
-    txt = m.command[1]   # the link
+    # Case 2: If user just sends a raw link
+    elif "http://" in txt or "https://" in txt:
+        url = txt
+
+    else:
+        return await m.reply_text("❌ Please send a valid link to shorten.")
 
     try:
-        short = await short_link(link=txt, user_id=usr.id)
+        short = await short_link(link=url, user_id=usr.id)
         msg = (
             "✨ Your Short Link is Ready!\n\n"
             f"🔗 <b>Your Link:</b> <code>{short}</code>\n\n"
@@ -250,10 +253,11 @@ async def shorten_link(_, m):
         await m.reply_text(
             msg,
             parse_mode="HTML",
+            disable_web_page_preview=True,
             reply_markup=InlineKeyboardMarkup([
                 [InlineKeyboardButton("❌ Close", callback_data="close")]
             ])
         )
 
     except Exception as e:
-        await m.reply_text(f"Error shortening link: {e}")
+        await m.reply_text(f"⚠️ Error shortening link: `{e}`", parse_mode="Markdown")
