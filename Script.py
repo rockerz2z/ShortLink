@@ -16,7 +16,7 @@ class text(object):
 
 𝘉𝘺 = @{}"""
   
-  ABOUT = """<b>‣ ᴍʏ ɴᴀᴍᴇ : <a href='https://telegram.me/ProfessorR2K'>sʜᴏʀᴛʟɪɴᴋ ʙᴏᴛ</a>
+  ABOUT = """<b>‣ ᴍʏ ɴᴀᴍᴇ : <a href='https://youtube.com/'>sʜᴏʀᴛʟɪɴᴋ ʙᴏᴛ</a>
 ‣ ʟɪʙʀᴀʀʏ : <a href='https://docs.pyrogram.org/'>ᴘʏʀᴏɢʀᴀᴍ</a> 
 ‣ ᴅᴀᴛᴀʙᴀsᴇ : <a href='https://www.mongodb.com/'>ᴍᴏɴɢᴏᴅʙ</a>
 ‣ ʟᴀɴɢᴜᴀɢᴇ : <a href='https://www.python.org/download/releases/3.0/'>ᴘʏᴛʜᴏɴ 𝟹</a> 
@@ -28,7 +28,7 @@ class text(object):
 𝘌𝘢𝘴𝘪𝘭𝘺 𝘴𝘩𝘰𝘳𝘵𝘦𝘯 𝘢𝘯𝘺 𝘭𝘪𝘯𝘬 𝘶𝘴𝘪𝘯𝘨 𝘤𝘰𝘮𝘮𝘢𝘯𝘥𝘴:
 
 <b>𝘌𝘹𝘢𝘮𝘱𝘭𝘦:</b>
-◉ `/tiny https://youtube.com`
+◉ `/tiny https://youtube.com/`
 
 <b>🔧 𝘚𝘦𝘵 𝘠𝘰𝘶𝘳 𝘗𝘳𝘦𝘧𝘦𝘳𝘳𝘦𝘥 𝘚𝘩𝘰𝘳𝘵𝘦𝘯𝘦𝘳:</b>  
 ◉ `/shortlink [site] [api_key]`
