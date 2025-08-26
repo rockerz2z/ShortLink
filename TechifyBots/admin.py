@@ -26,7 +26,8 @@ def parse_button_markup(text: str):
         else:
             final_text_lines.append(line)
     return InlineKeyboardMarkup(buttons) if buttons else None, "\n".join(final_text_lines).strip()
-
+
+
 @Client.on_message(filters.command("stats") & filters.private & filters.user(ADMIN))
 async def total_users(client, message):
     try:
