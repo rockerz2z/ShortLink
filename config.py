@@ -1,17 +1,66 @@
 import os
-from typing import List
+from datetime import datetime
+from pytz import timezone
+from pyrogram import Client
+from aiohttp import web
+from config import API_ID, API_HASH, BOT_TOKEN, ADMIN, LOG_CHANNEL
 
-API_ID = os.environ.get("API_ID", "21388641")
-API_HASH = os.environ.get("API_HASH", "16f909bd213b2222a620d7641036834e")
-BOT_TOKEN = os.environ.get("BOT_TOKEN", "7687664954:AAHmT5ljOC4W571RebEKQldi5gBzW5QDQEk")
+routes = web.RouteTableDef()
 
-ADMIN = int(os.environ.get("ADMIN", "6221939103"))
-PICS = (os.environ.get("PICS", "https://envs.sh/FT5.jpg")).split()
+@routes.get("/", allow_head=True)
+async def root_route(request):
+    return web.Response(text="<h3 align='center'><b>I am Alive</b></h3>", content_type='text/html')
 
-LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", "-1002884841659"))
+async def web_server():
+    app = web.Application(client_max_size=30_000_000)
+    app.add_routes(routes)
+    return app
 
-DB_URI = os.environ.get("DB_URI", "mongodb+srv://riyazahamed1806:d3corXDVXjrfS8NJ@cluster0.emcu0y2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
-DB_NAME = os.environ.get("DB_NAME", "Shortlinks")
+class Bot(Client):
+    def __init__(self):
+        super().__init__(
+            "techifybots",
+            api_id=API_ID,
+            api_hash=API_HASH,
+            bot_token=BOT_TOKEN,
+            plugins=dict(root="TechifyBots"),
+            workers=200,
+            sleep_threshold=15
+        )
 
-IS_FSUB = os.environ.get("IS_FSUB", "True").lower() == "true"  # Set "True" For Enable Force Subscribe
-AUTH_CHANNELS = list(map(int, os.environ.get("AUTH_CHANNEL", "-1001957183140").split())) # Add Multiple channel ids
+    async def start(self):
+        app = web.AppRunner(await web_server())
+        await app.setup()
+        try:
+            await web.TCPSite(app, "0.0.0.0", int(os.getenv("PORT", 8080))).start()
+            print("Web server started.")
+        except Exception as e:
+            print(f"Web server error: {e}")
+
+
+        await super().start()
+        me = await self.get_me()
+        print(f"Bot Started as {me.first_name}")
+        if isinstance(ADMIN, int):
+            try:
+                await self.send_message(ADMIN, f"**{me.first_name} is started...**")
+            except Exception as e:
+                print(f"Error sending message to admin: {e}")
+        if LOG_CHANNEL:
+            try:
+                now = datetime.now(timezone("Asia/Kolkata"))
+                msg = (
+                    f"**{me.mention} is restarted!**\n\n"
+                    f"📅 Date : `{now.strftime('%d %B, %Y')}`\n"
+                    f"⏰ Time : `{now.strftime('%I:%M:%S %p')}`\n"
+                    f"🌐 Timezone : `Asia/Kolkata`"
+                )
+                await self.send_message(LOG_CHANNEL, msg)
+            except Exception as e:
+                print(f"Error sending to LOG_CHANNEL: {e}")
+
+    async def stop(self, *args):
+        await super().stop()
+        print(f"{me.first_name} Bot stopped.")
+
+Bot().run()
