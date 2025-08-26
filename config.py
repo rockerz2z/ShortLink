@@ -5,7 +5,7 @@ API_ID = os.environ.get("API_ID", "21388641")
 API_HASH = os.environ.get("API_HASH", "16f909bd213b2222a620d7641036834e")
 BOT_TOKEN = os.environ.get("BOT_TOKEN", "7687664954:AAHmT5ljOC4W571RebEKQldi5gBzW5QDQEk")
 
-ADMIN = int(os.environ.get("ADMIN", "6221939103 1078638766"))
+ADMIN = int(os.environ.get("ADMIN", "6221939103"))
 PICS = (os.environ.get("PICS", "https://envs.sh/FT5.jpg")).split()
 
 LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", "-1002884841659"))
