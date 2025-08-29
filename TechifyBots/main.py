@@ -7,26 +7,44 @@ from config import *
 import random
 from .db import tb
 from shortzy import Shortzy
-from config import *
 from .fsub import get_fsub
 from Script import text
 from .maintenance import get_maintenance
 
+
+# ✅ Multi-domain shortener support with timeout
 async def short_link(link, user_id):
     usite = await tb.get_value("shortner", user_id=user_id)
-    uapi = await tb.get_value("api", user_id=user_id) 
-    shortzy = Shortzy(api_key=uapi, base_site=usite)
-    return await shortzy.convert_from_text(link)
+    uapi = await tb.get_value("api", user_id=user_id)
 
+    if not usite or not uapi:
+        return "⚠️ No shortener configured. Use /shortlink <site> <api_key> first."
+
+    shortzy = Shortzy(api_key=uapi, base_site=usite)
+
+    try:
+        return await asyncio.wait_for(shortzy.convert_from_text(link), timeout=8)
+    except asyncio.TimeoutError:
+        return "⚠️ Shortener API took too long to respond. Try again."
+    except Exception as e:
+        return f"⚠️ Error shortening link: {e}"
+
+
+# ✅ Save + validate user’s shortener
 async def save_data(tst_url, tst_api, user_id):
     shortzy = Shortzy(api_key=tst_api, base_site=tst_url)
-    link=f"https://telegram.me/R2k_bots"
-    short = await shortzy.convert(link)        
-    if short.startswith("http"):
-        await tb.set_shortner(user_id=user_id, shortner=tst_url, api=tst_api)
-        return True
-    else:
+    link = "https://telegram.me/R2k_bots"
+    try:
+        short = await asyncio.wait_for(shortzy.convert(link), timeout=8)
+        if short.startswith("http"):
+            await tb.set_shortner(user_id=user_id, shortner=tst_url, api=tst_api)
+            return True
         return False
+    except asyncio.TimeoutError:
+        return False
+    except Exception:
+        return False
+
 
 @Client.on_message(filters.command('start') & filters.private)
 async def start_handler(c, m):
@@ -70,16 +88,18 @@ async def start_handler(c, m):
     except Exception as u:
         await m.reply(f"**❌ Error:** `{str(u)}`")
 
+
 @Client.on_message(filters.command('shortlink') & filters.private)
 async def save_shortlink(c, m):
     if await tb.is_user_banned(m.from_user.id):
         await m.reply("**🚫 You are banned from using this bot**",
                       reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
         return
-    if IS_FSUB and not await get_fsub(c, m): return
+    if IS_FSUB and not await get_fsub(c, m):
+        return
     if len(m.command) < 3:
         await m.reply_text(
-            "**❌ Please provide both the Shortener URL and API key along with the command.\n\nExample: `/shortlink example.com your_api_key`\n\n>❤️‍🔥 By: @R2k_bots**",
+            "**❌ Please provide both the Shortener URL and API key along with the command.\n\nExample: `/shortlink get2short.com your_api_key`\n\n>❤️‍🔥 By: @R2k_bots**",
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
         return
     usr = m.from_user
@@ -90,9 +110,12 @@ async def save_shortlink(c, m):
     )
     if elg:
         await m.reply_text(
-            f"**✅ Shortener has been set successfully!\n\nShortener URL - {await tb.get_value('shortner', user_id=usr.id)}\nShortener API - {await tb.get_value('api', user_id=usr.id)}\n\n>❤️‍🔥 By: @R2k_bots**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
-    else:       
-        await m.reply_text("**⚠️ Error:\n\nYour Shortlink API or URL is invalid, please check again!**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
+            f"**✅ Shortener has been set successfully!\n\n🌐 Shortener URL - {await tb.get_value('shortner', user_id=usr.id)}\n🔑 Shortener API - {await tb.get_value('api', user_id=usr.id)}\n\n>❤️‍🔥 By: @R2k_bots**",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
+    else:
+        await m.reply_text("**⚠️ Error:\n\nYour Shortlink API or URL is invalid, please check again!**",
+                           reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
+
 
 @Client.on_message(filters.command('info') & filters.private)
 async def showinfo(c, m):
@@ -107,44 +130,32 @@ async def showinfo(c, m):
         f"**Your Information\n\n👤 User: {usr.mention}\n🆔 User ID: `{usr.id}`\n\n🌐 Connected Site: `{site}`\n🔗 Connected API: `{api}`\n\n>❤️‍🔥 By: @R2k_bots**",
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
 
+
 @Client.on_message(filters.command("tiny") & filters.private)
 async def tiny_handler(client, message):
     if await get_maintenance() and message.from_user.id != ADMIN:
-        return await message.reply_text("**🛠️ Bot is Under Maintenance**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
+        return await message.reply_text("**🛠️ Bot is Under Maintenance**",
+                                        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2:
-        await message.reply_text(
-            "❗ Send a valid URL.\n\n◉ `/tiny https://youtube.com/`",
-            quote=True
-        )
+        await message.reply_text("❗ Send a valid URL.\n\n◉ `/tiny https://youtube.com/`", quote=True)
         return
 
     url = parts[1].strip()
     if not url.startswith(("http://", "https://")):
-        await message.reply_text(
-            "❗ URL must start with http:// or https://",
-            quote=True
-        )
+        await message.reply_text("❗ URL must start with http:// or https://", quote=True)
         return
 
     try:
-        async with httpx.AsyncClient() as client_httpx:
+        async with httpx.AsyncClient(timeout=8) as client_httpx:
             resp = await client_httpx.get(f"http://tinyurl.com/api-create.php?url={url}")
             short_url = resp.text.strip()
         if not short_url.startswith("http"):
-            await message.reply_text(
-                "❌ TinyURL could not shorten this link. Try a different URL.",
-                quote=True
-            )
+            await message.reply_text("❌ TinyURL could not shorten this link. Try a different URL.", quote=True)
             return
 
-        reply_markup = InlineKeyboardMarkup(
-            [[InlineKeyboardButton("❌ Close", callback_data="close")]]
-        )
-        sent = await message.reply_text(
-            f"🔗 **ShortLink:**\n\n`{short_url}`",
-            reply_markup=reply_markup
-        )
+        reply_markup = InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]])
+        sent = await message.reply_text(f"🔗 **ShortLink:**\n\n`{short_url}`", reply_markup=reply_markup)
         await asyncio.sleep(300)
         try:
             await sent.delete()
@@ -153,18 +164,22 @@ async def tiny_handler(client, message):
     except Exception as e:
         await message.reply_text(f"❌ Failed to shorten using TinyURL: {e}", quote=True)
 
-@Client.on_message(filters.text & filters.private & ~filters.command(["tiny", "stats", " broadcast "]))
-async def shorten_link(_, m):
+
+@Client.on_message(filters.text & filters.private & ~filters.command(["tiny", "stats", "broadcast"]))
+async def shorten_link_handler(_, m):
     if await get_maintenance() and m.from_user.id != ADMIN:
         await m.delete()
-        return await m.reply_text("**🛠️ Bot is Under Maintenance**", reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))    
+        return await m.reply_text("**🛠️ Bot is Under Maintenance**",
+                                  reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
     if await tb.is_user_banned(m.from_user.id):
         await m.reply("**🚫 You are banned from using this bot**",
                       reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
         return
-    if IS_FSUB and not await get_fsub(_, m): return
+    if IS_FSUB and not await get_fsub(_, m):
+        return
     txt = m.text
-    if txt.startswith("/"): return
+    if txt.startswith("/"):
+        return
     if not ("http://" in txt or "https://" in txt):
         await m.reply_text("Please send a valid link to shorten.")
         return
