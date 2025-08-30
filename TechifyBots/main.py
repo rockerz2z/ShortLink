@@ -273,9 +273,55 @@ async def bulk_handler(c, m):
 
 # ------------------ AUTO SHORTEN TEXT HANDLER ------------------
 
-@Client.on_message(filters.text & filters.private & ~filters.command(["tiny", "stats", "broadcast", "bulk", "balance", "withdraw", "withdraw_request", "analytics", "profile", "withdraw_history"]))
+@Client.on_message(filters.text & filters.private & ~filters.command(["start", "tiny", "stats", "broadcast", "bulk", "balance", "withdraw", "withdraw_request", "analytics", "profile", "withdraw_history"]))
 async def shorten_link_handler(_, m):
     if await get_maintenance() and m.from_user.id != ADMIN:
+        return await m.reply_text("**🛠️ Bot is Under Maintenance**")
+
+    if await tb.is_user_banned(m.from_user.id):
+        return await m.reply("**🚫 You are banned from using this bot**")
+
+    if IS_FSUB and not await get_fsub(_, m):
+        return
+
+    # Check if the message contains a valid URL
+    text = m.text.strip()
+    if not (text.startswith("http://") or text.startswith("https://")):
+        return await m.reply_text(
+            "📎 **Please send a valid link to shorten.**\n\n"
+            "✅ **Accepted formats:**\n"
+            "• `https://example.com`\n"
+            "• `http://example.com`\n\n"
+            "💡 **Tip:** Make sure your link starts with http:// or https://",
+            quote=True,
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]])
+        )
+
+    try:
+        loading_msg = await m.reply_text("🔄 **Shortening your link...**", quote=True)
+        
+        short_url = await short_link(text, m.from_user.id)
+        
+        if short_url and short_url != text:
+            await tb.add_balance(m.from_user.id, 0.01)
+            await loading_msg.edit_text(
+                f"✅ **Link Shortened Successfully!**\n\n"
+                f"🔗 **Original:** `{text}`\n"
+                f"🔗 **Short Link:** `{short_url}`\n\n"
+                f"💰 **Earnings:** +₹0.01",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]])
+            )
+        else:
+            await loading_msg.edit_text(
+                "❌ **Failed to shorten link**\n\n"
+                "Please check if:\n"
+                "• The link is valid and accessible\n"
+                "• Your shortener settings are configured\n\n"
+                "💡 Use `/profile` to check your shortener settings",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]])
+            )
+    except Exception as e:
+        await m.reply_text(f"❌ **Error:** {str(e)}", quote=True)nce() and m.from_user.id != ADMIN:
         await m.delete()
         return await m.reply_text("**🛠️ Bot is Under Maintenance**",
                                   reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
