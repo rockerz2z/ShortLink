@@ -18,11 +18,15 @@ URL_REGEX = r'(https?://[^\s]+)'
 async def shorten_url(original_url, api_key, base_site="shortzy.in"):
     try:
         async with httpx.AsyncClient() as client:
-            resp = await client.get(f"https://{base_site}/api?api={api_key}&url={original_url}", timeout=8)
-            data = resp.json()
+            resp = await client.get(
+                f"https://{base_site}/api",
+                params={"api": api_key, "url": original_url},
+                timeout=8
+            )
+            data = await resp.asejson()
             if data.get("status") == "success":
                 return data.get("shortenedUrl")
-            return original_url  # fallback
+            return original_url  # fallback if failed
     except Exception as e:
         print(f"[ERROR] Failed to shorten: {original_url} — {e}")
         return original_url
@@ -31,18 +35,18 @@ async def shorten_urls_in_text(text, api_key, base_site="shortzy.in"):
     urls = re.findall(URL_REGEX, text)
     if not urls:
         return text
-
     updated_text = text
     for url in urls:
         short_url = await shorten_url(url, api_key, base_site)
         updated_text = updated_text.replace(url, short_url)
-
     return updated_text
 
 # --- DB Handling ---
 async def short_link(link, user_id):
     usite = await tb.get_value("shortner", user_id=user_id) or "shortzy.in"
     uapi = await tb.get_value("api", user_id=user_id)
+    if not uapi:
+        return link  # API not set yet
     return await shorten_url(link, uapi, usite)
 
 async def save_data(tst_url, tst_api, user_id):
@@ -99,17 +103,17 @@ async def save_shortlink(c, m):
     if IS_FSUB and not await get_fsub(c, m): return
     if len(m.command) < 3:
         return await m.reply_text(
-            "**❌ Please provide both the Shortener URL and API key along with the command.\n\nExample: `/shortlink shortzy.in your_api_key`**",
+            "**❌ Please provide both the Shortener URL and API key.\n\nExample: `/shortlink shortzy.in your_api_key`**",
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
 
     usr = m.from_user
     elg = await save_data(m.command[1], m.command[2], user_id=usr.id)
     if elg:
         return await m.reply_text(
-            f"**✅ Shortener has been set successfully!\n\n🌐 URL - {await tb.get_value('shortner', user_id=usr.id)}\n🔑 API - {await tb.get_value('api', user_id=usr.id)}**",
+            f"**✅ Shortener set successfully!\n\n🌐 URL - {await tb.get_value('shortner', user_id=usr.id)}\n🔑 API - {await tb.get_value('api', user_id=usr.id)}**",
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
     else:
-        return await m.reply_text("**⚠️ Error:\n\nYour Shortlink API or URL is invalid, please check again!**",
+        return await m.reply_text("**⚠️ Error:\n\nInvalid Shortlink API or URL!**",
                                   reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
 
 @Client.on_message(filters.command('info') & filters.private)
@@ -153,25 +157,31 @@ async def tiny_handler(client, message):
         await message.reply_text(f"❌ Failed with TinyURL: {e}", quote=True)
 
 @Client.on_message(filters.text & filters.private & ~filters.command(["tiny", "stats", "broadcast"]))
-async def shorten_link(_, m):
+async def shorten_link_handler(_, m):
     if await get_maintenance() and m.from_user.id != ADMIN:
-        await m.delete()
-        return await m.reply_text("**🛠️ Bot is Under Maintenance**",
-                                  reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
+        return await m.reply_text("**🛠️ Bot is Under Maintenance**")
+
     if await tb.is_user_banned(m.from_user.id):
-        return await m.reply("**🚫 You are banned from using this bot**",
-                             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
+        return await m.reply("**🚫 You are banned from using this bot**")
+
     if IS_FSUB and not await get_fsub(_, m): return
 
     txt = m.text
-    if txt.startswith("/"): return
-    if not ("http://" in txt or "https://" in txt):
-        return await m.reply_text("Please send a valid link to shorten.")
+    if txt.startswith("/"):
+        return
 
     usr = m.from_user
+    api = await tb.get_value("api", user_id=usr.id)
+    site = await tb.get_value("shortner", user_id=usr.id) or "shortzy.in"
+
+    if not api:
+        return await m.reply_text("⚠️ You haven’t set your shortener yet. Use:\n\n`/shortlink shortzy.in YOUR_API_KEY`")
+
     try:
-        short = await short_link(link=txt, user_id=usr.id)
-        msg = f"**✨ Your Short Link is Ready!\n\n🔗 Link: <code>{short}</code>**"
-        await m.reply_text(msg, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
+        short_text = await shorten_urls_in_text(txt, api, site)
+        await m.reply_text(
+            f"✨ **Your Short Link(s) are Ready!**\n\n{short_text}",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]])
+        )
     except Exception as e:
         await m.reply_text(f"Error shortening link: {e}")
