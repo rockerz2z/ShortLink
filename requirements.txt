@@ -11,3 +11,4 @@ Jinja2
 werkzeug
 itsdangerous
 aiohttp
+pyrogram
