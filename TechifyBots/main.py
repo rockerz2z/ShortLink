@@ -33,7 +33,7 @@ async def short_link(link, user_id):
 
 async def save_data(tst_url, tst_api, user_id):
     shortzy = Shortzy(api_key=tst_api, base_site=tst_url)
-    link = "https://telegram.me/TechifyBots"
+    link = "https://telegram.me/R2k_bots"
     try:
         short = await shortzy.convert(link)
     except Exception:
@@ -98,7 +98,7 @@ async def save_shortlink(c, m):
     if len(m.command) < 3:
         return await m.reply_text(
             "**❌ Please provide both the Shortener URL and API key along with the command.**\n\n"
-            "Example: `/shortlink example.com your_api_key`\n\n>❤️‍🔥 By: @TechifyBots",
+            "Example: `/shortlink example.com your_api_key`\n\n>❤️‍🔥 By: @R2k_bots",
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]])
         )
 
@@ -114,7 +114,7 @@ async def save_shortlink(c, m):
             f"**✅ Shortener has been set successfully!**\n\n"
             f"🌐 Shortener URL - `{await tb.get_value('shortner', user_id=usr.id)}`\n"
             f"🔑 Shortener API - `{await tb.get_value('api', user_id=usr.id)}`\n\n"
-            f">❤️‍🔥 By: @TechifyBots",
+            f">❤️‍🔥 By: @R2k_bots",
             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]])
         )
     else:
@@ -136,7 +136,7 @@ async def showinfo(c, m):
 
     await m.reply_text(
         f"**Your Information**\n\n👤 User: {usr.mention}\n🆔 User ID: `{usr.id}`\n\n"
-        f"🌐 Connected Site: `{site}`\n🔗 Connected API: `{api}`\n\n>❤️‍🔥 By: @TechifyBots",
+        f"🌐 Connected Site: `{site}`\n🔗 Connected API: `{api}`\n\n>❤️‍🔥 By: @R2k_bots",
         reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]])
     )
 
@@ -149,7 +149,7 @@ async def tiny_handler(client, message):
 
     parts = message.text.split(maxsplit=1)
     if len(parts) < 2:
-        return await message.reply_text("❗ Send a valid URL.\n\n◉ `/tiny https://youtube.com/@techifybots`", quote=True)
+        return await message.reply_text("❗ Send a valid URL.\n\n◉ `/tiny https://youtube.com/`", quote=True)
 
     url = parts[1].strip()
     if not url.startswith(("http://", "https://")):
@@ -204,7 +204,7 @@ async def shorten_link_handler(_, m):
         # Automatically shortens single link or multiple links inside text
         short = await short_link(link=txt, user_id=usr.id)
 
-        msg = f"**✨ Your Short Link(s) are Ready!**\n\n🔗 {short}\n\n>❤️‍🔥 By: @TechifyBots"
+        msg = f"**✨ Your Short Link(s) are Ready!**\n\n🔗 {short}\n\n>❤️‍🔥 By: @R2k_bots"
         await m.reply_text(msg, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
 
     except Exception as e:
