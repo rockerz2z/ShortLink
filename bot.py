@@ -41,6 +41,13 @@ class Bot(Client):
         await super().start()
         me = await self.get_me()
         print(f"Bot Started as {me.first_name}")
+        
+        # Start notification scheduler
+        from TechifyBots.notifications import start_notification_scheduler
+        import asyncio
+        asyncio.create_task(start_notification_scheduler(self))
+        print("Notification scheduler started.")
+        
         if isinstance(ADMIN, int):
             try:
                 await self.send_message(ADMIN, f"**{me.first_name} is started...**")
