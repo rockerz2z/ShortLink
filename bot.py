@@ -68,6 +68,7 @@ class Bot(Client):
 
     async def stop(self, *args):
         await super().stop()
+        me = await self.get_me()
         print(f"{me.first_name} Bot stopped.")
 
 Bot().run()
