@@ -193,30 +193,30 @@ async def forwarded_handler(_, m):
     # Process forwarded messages with media and text
     if m.text or m.caption:
         text_content = m.text or m.caption or ""
-        
+
         # Skip if no links found
         if not ("http://" in text_content or "https://" in text_content):
             return
-        
+
         # Skip telegram links
         if "t.me/" in text_content or "telegram.me/" in text_content:
             return await m.reply_text("🚫 Telegram links are not supported for shortening.")
-        
+
         try:
             # Shorten links in the forwarded content
             short_content = await short_link(link=text_content, user_id=m.from_user.id)
-            
+
             # Add to analytics
             link_count = text_content.count("http://") + text_content.count("https://")
             await tb.add_link_created(m.from_user.id, link_count)
-            
+
             # Simulate some clicks and earnings (you can integrate with actual shortener API for real data)
             import random
             clicks = random.randint(0, 5)  # Random clicks for demo
             if clicks > 0:
                 await tb.add_link_click(m.from_user.id, clicks)
                 await tb.add_balance(m.from_user.id, clicks * 0.01)  # ₹0.01 per click
-            
+
             # Send the shortened content with media if present
             if m.photo:
                 await m.reply_photo(
@@ -241,7 +241,7 @@ async def forwarded_handler(_, m):
                     f"**✨ Shortened Links from Forwarded Post**\n\n{short_content}\n\n>❤️‍🔥 By: @R2k_bots",
                     reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]])
                 )
-                
+
         except Exception as e:
             await m.reply_text(f"Error processing forwarded post: {e}")
 
@@ -299,9 +299,9 @@ async def shorten_link_handler(_, m):
 
     try:
         loading_msg = await m.reply_text("🔄 **Shortening your link...**", quote=True)
-        
+
         short_url = await short_link(text, m.from_user.id)
-        
+
         if short_url and short_url != text:
             await tb.add_balance(m.from_user.id, 0.01)
             await loading_msg.edit_text(
@@ -321,118 +321,4 @@ async def shorten_link_handler(_, m):
                 reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]])
             )
     except Exception as e:
-        await m.reply_text(f"❌ **Error:** {str(e)}", quote=True)nce() and m.from_user.id != ADMIN:
-        await m.delete()
-        return await m.reply_text("**🛠️ Bot is Under Maintenance**",
-                                  reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
-
-    if await tb.is_user_banned(m.from_user.id):
-        return await m.reply("**🚫 You are banned from using this bot**",
-                             reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
-
-    if IS_FSUB and not await get_fsub(_, m):
-        return
-
-    txt = m.text
-    if txt.startswith("/"):
-        return
-    if not ("http://" in txt or "https://" in txt):
-        return await m.reply_text("Please send a valid link to shorten.")
-
-    # Skip telegram links
-    if "t.me/" in txt or "telegram.me/" in txt:
-        return await m.reply_text("🚫 Telegram links are not supported for shortening.")
-
-    usr = m.from_user
-    
-    # Check if this is bulk shortening (multiple lines)
-    lines = txt.strip().split('\n')
-    links = [line.strip() for line in lines if line.strip() and ("http://" in line or "https://" in line)]
-    
-    if len(links) > 20:
-        return await m.reply_text("❌ **Too many links!** Maximum 20 links allowed per request.")
-    
-    if len(links) > 1:
-        # Bulk shortening
-        try:
-            processing_msg = await m.reply_text("⏳ **Processing your links...**")
-            
-            shortened_links = []
-            skipped_count = 0
-            
-            for link in links:
-                # Skip telegram links
-                if "t.me/" in link or "telegram.me/" in link:
-                    skipped_count += 1
-                    continue
-                
-                try:
-                    short = await short_link(link=link, user_id=usr.id)
-                    shortened_links.append(f"🔗 {short}")
-                except Exception as e:
-                    shortened_links.append(f"❌ Failed: {link}")
-            
-            # Add to analytics
-            await tb.add_link_created(usr.id, len(shortened_links))
-            
-            # Simulate some clicks and earnings
-            import random
-            total_clicks = random.randint(0, len(shortened_links) * 3)
-            if total_clicks > 0:
-                await tb.add_link_click(usr.id, total_clicks)
-                await tb.add_balance(usr.id, total_clicks * 0.01)
-            
-            result_text = (
-                f"📦 **Bulk Shortening Complete!**\n\n"
-                f"✅ **Processed:** {len(shortened_links)} links\n"
-                f"⏭️ **Skipped:** {skipped_count} telegram links\n\n"
-                f"**📋 Your Shortened Links:**\n\n" + 
-                "\n".join(shortened_links) +
-                f"\n\n💰 **Earned:** ₹{total_clicks * 0.01:.2f} (estimated)\n\n>❤️‍🔥 By: @R2k_bots"
-            )
-            
-            await processing_msg.edit_text(
-                result_text,
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton("💰 Balance", callback_data="check_balance"),
-                     InlineKeyboardButton("📊 Analytics", callback_data="analytics")],
-                    [InlineKeyboardButton("❌ Close", callback_data="close")]
-                ])
-            )
-            
-        except Exception as e:
-            await m.reply_text(f"Error in bulk shortening: {e}")
-    else:
-        # Single link shortening
-        try:
-            # Automatically shortens single link or multiple links inside text
-            short = await short_link(link=txt, user_id=usr.id)
-            
-            # Add to analytics
-            link_count = txt.count("http://") + txt.count("https://")
-            await tb.add_link_created(usr.id, link_count)
-            
-            # Simulate some clicks and earnings
-            import random
-            clicks = random.randint(0, 3)
-            if clicks > 0:
-                await tb.add_link_click(usr.id, clicks)
-                await tb.add_balance(usr.id, clicks * 0.01)
-
-            msg = (
-                f"**✨ Your Short Link is Ready!**\n\n"
-                f"🔗 {short}\n\n"
-                f"💰 **Estimated Earnings:** ₹{clicks * 0.01:.2f}\n\n"
-                f">❤️‍🔥 By: @R2k_bots"
-            )
-            await m.reply_text(
-                msg, 
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton("💰 Balance", callback_data="check_balance"),
-                     InlineKeyboardButton("📊 Analytics", callback_data="analytics")],
-                    [InlineKeyboardButton("❌ Close", callback_data="close")]
-                ])
-            )
-
-        except Exception as e:
-            await m.reply_text(f"Error shortening link: {e}")
+        await m.reply_text(f"❌ **Error:** {str(e)}", quote=True)
