@@ -1,292 +1,280 @@
-from typing import Any
-from config import *
-from motor import motor_asyncio
-from datetime import datetime, timedelta
+from pyrogram import Client
+from pyrogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup
+from Script import text
+from config import ADMIN
+from .db import tb
+from .analytics import send_analytics
+from .notifications import send_withdrawal_notification
 
-client: motor_asyncio.AsyncIOMotorClient[Any] = motor_asyncio.AsyncIOMotorClient(DB_URI)
-db = client[DB_NAME]
+@Client.on_callback_query()
+async def callback_query_handler(client, query: CallbackQuery):
+    if query.data == "start":
+        await query.message.edit_caption(
+            caption=text.START.format(query.from_user.mention),
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("ℹ️ 𝖠𝖻𝗈𝗎𝗍", callback_data="about"),
+                 InlineKeyboardButton("📚 𝖧𝖾𝗅𝗉", callback_data="help")],
+                [InlineKeyboardButton("👨‍💻 𝖣𝖾𝗏𝖾𝗅𝗈𝗉𝖾𝗋 👨‍💻", url="https://t.me/ProfessorR2K")]
 
-class Techifybots:
-    def __init__(self):
-        self.users = db["users"]
-        self.banned_users = db["banned_users"]
-        self.analytics = db["analytics"]
-        self.withdrawals = db["withdrawals"]
-        self.notifications = db["notifications"]
-        self.cache: dict[int, dict[str, Any]] = {}
+            ])
+        )
 
-    async def add_user(self, user_id: int, name: str) -> dict[str, Any] | None:
-        try:
-            user: dict[str, Any] = {
-                "user_id": user_id,
-                "name": name,
-                "shortner": None,
-                "api": None,
-                "balance": 0.0,
-                "total_links": 0,
-                "total_clicks": 0,
-                "today_links": 0,
-                "today_clicks": 0,
-                "last_click_update": datetime.now(),
-                "min_withdraw": 5.0,
-                "joined_date": datetime.now()
-            }
-            await self.users.insert_one(user)
-            self.cache[user_id] = user
-            return user
-        except Exception as e:
-            print("Error in addUser:", e)
+    elif query.data == "help":
+        await query.message.edit_caption(
+            caption=text.HELP,
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("📢 𝖴𝗉𝖽𝖺𝗍𝖾𝗌", url="https://telegram.me/R2K_Bots"),
+                 InlineKeyboardButton("💬 𝖲𝗎𝗉𝗉𝗈𝗋𝗍", url="https://telegram.me/ProfessorR2K")],
+                [InlineKeyboardButton("↩️ 𝖡𝖺𝖼𝗄", callback_data="start"),
+                 InlineKeyboardButton("❌ 𝖢𝗅𝗈𝗌𝖾", callback_data="close")]
+            ])
+        )
 
-    async def get_user(self, user_id: int) -> dict[str, Any] | None:
-        try:
-            if user_id in self.cache:
-                return self.cache[user_id]
-            user = await self.users.find_one({"user_id": user_id})
-            return user
-        except Exception as e:
-            print("Error in getUser:", e)
-            return None
+    elif query.data == "about":
+        await query.message.edit_caption(
+            caption=text.ABOUT,
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("👨‍💻 𝖣𝖾𝗏𝖾𝗅𝗈𝗉𝖾𝗋 👨‍💻", url="https://t.me/ProfessorR2K")],
+                [InlineKeyboardButton("↩️ 𝖡𝖺𝖼𝗄", callback_data="start"),
+                 InlineKeyboardButton("❌ 𝖢𝗅𝗈𝗌𝖾", callback_data="close")]
+            ])
+        )
 
-    async def get_all_users(self) -> list[dict[str, Any]]:
-        try:
-            users: list[dict[str, Any]] = []
-            async for user in self.users.find():
-                users.append(user)
-            return users
-        except Exception as e:
-            print("Error in getAllUsers:", e)
-            return []
+    elif query.data == "close":
+        await query.message.delete()
 
-    async def ban_user(self, user_id: int, reason: str = None) -> bool:
-        try:
-            ban = {"user_id": user_id, "reason": reason}
-            await self.banned_users.insert_one(ban)
-            return True
-        except Exception as e:
-            print("Error in banUser:", e)
-            return False
+    # Balance and Analytics callbacks
+    elif query.data == "check_balance":
+        user_id = query.from_user.id
+        balance = await tb.get_balance(user_id)
+        
+        await query.message.edit_text(
+            f"💰 **Your Balance**\n\n"
+            f"💵 Current Balance: `₹{balance:.2f}`\n"
+            f"💸 Minimum Withdrawal: `₹5.00`\n\n"
+            f"💡 **Tip:** Share more links to earn more money!\n\n"
+            f">❤️‍🔥 By: @R2k_bots",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("💸 Withdraw", callback_data="withdraw"),
+                 InlineKeyboardButton("📊 Analytics", callback_data="analytics")],
+                [InlineKeyboardButton("📈 Profile", callback_data="profile"),
+                 InlineKeyboardButton("📋 History", callback_data="withdraw_history")],
+                [InlineKeyboardButton("❌ Close", callback_data="close")]
+            ])
+        )
 
-    async def unban_user(self, user_id: int) -> bool:
-        try:
-            result = await self.banned_users.delete_one({"user_id": user_id})
-            return result.deleted_count > 0
-        except Exception as e:
-            print("Error in unbanUser:", e)
-            return False
-
-    async def is_user_banned(self, user_id: int) -> bool:
-        try:
-            user = await self.banned_users.find_one({"user_id": user_id})
-            return user is not None
-        except Exception as e:
-            print("Error in isUserBanned:", e)
-            return False
-
-    async def set_shortner(self, user_id: int, shortner: str, api: str):
-        try:
-            await self.users.update_one(
-                {'user_id': user_id},
-                {'$set': {'shortner': shortner, 'api': api}},
-                upsert=True
+    elif query.data == "withdraw":
+        user_id = query.from_user.id
+        balance = await tb.get_balance(user_id)
+        
+        if balance < 5.0:
+            await query.answer(
+                f"❌ Insufficient Balance! You have ₹{balance:.2f}. Minimum ₹5.00 required.",
+                show_alert=True
             )
-        except Exception as e:
-            print("Error in set_shortner:", e)
-
-    async def get_value(self, key: str, user_id: int):
-        try:
-            user = await self.users.find_one({'user_id': user_id})
-            if user:
-                return user.get(key)
-        except Exception as e:
-            print("Error in get_value:", e)
-            return None
-
-    # Balance related methods
-    async def add_balance(self, user_id: int, amount: float):
-        try:
-            await self.users.update_one(
-                {'user_id': user_id},
-                {'$inc': {'balance': amount}},
-                upsert=True
+        else:
+            await query.message.edit_text(
+                f"💸 **Withdrawal Request**\n\n"
+                f"💵 Available Balance: `₹{balance:.2f}`\n\n"
+                f"📝 **Instructions:**\n"
+                f"Use command: `/withdraw_request <amount> <method> <details>`\n\n"
+                f"**Example:**\n"
+                f"`/withdraw_request 10 UPI 9876543210@paytm`\n"
+                f"`/withdraw_request 25 Bank ACCOUNT_NUMBER`\n\n"
+                f"**Supported Methods:** UPI, Bank, PayPal, Paytm",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("📋 History", callback_data="withdraw_history"),
+                     InlineKeyboardButton("💰 Balance", callback_data="check_balance")],
+                    [InlineKeyboardButton("❌ Close", callback_data="close")]
+                ])
             )
-            if user_id in self.cache:
-                self.cache[user_id]['balance'] = self.cache[user_id].get('balance', 0) + amount
-        except Exception as e:
-            print("Error in add_balance:", e)
 
-    async def get_balance(self, user_id: int) -> float:
-        try:
-            user = await self.users.find_one({'user_id': user_id})
-            return user.get('balance', 0.0) if user else 0.0
-        except Exception as e:
-            print("Error in get_balance:", e)
-            return 0.0
+    elif query.data == "analytics":
+        await query.message.edit_text(
+            "📊 **Select Analytics Period**",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("📅 Daily", callback_data="analytics_daily"),
+                 InlineKeyboardButton("📈 Weekly", callback_data="analytics_weekly")],
+                [InlineKeyboardButton("📊 Monthly", callback_data="analytics_monthly"),
+                 InlineKeyboardButton("📋 Profile", callback_data="profile")],
+                [InlineKeyboardButton("💰 Balance", callback_data="check_balance"),
+                 InlineKeyboardButton("❌ Close", callback_data="close")]
+            ])
+        )
 
-    # Analytics methods
-    async def add_link_click(self, user_id: int, clicks: int = 1):
-        try:
-            today = datetime.now().date()
-            await self.users.update_one(
-                {'user_id': user_id},
-                {
-                    '$inc': {
-                        'total_clicks': clicks,
-                        'today_clicks': clicks
-                    },
-                    '$set': {'last_click_update': datetime.now()}
-                },
-                upsert=True
+    elif query.data.startswith("analytics_"):
+        period = query.data.split("_")[1]
+        await send_analytics(query.message, period)
+
+    elif query.data == "profile":
+        user_id = query.from_user.id
+        user_data = await tb.get_user(user_id)
+        
+        if not user_data:
+            await query.answer("❌ User data not found!", show_alert=True)
+            return
+        
+        balance = user_data.get('balance', 0.0)
+        total_links = user_data.get('total_links', 0)
+        total_clicks = user_data.get('total_clicks', 0)
+        joined_date = user_data.get('joined_date')
+        shortner = user_data.get('shortner', 'Not Set')
+        
+        from datetime import datetime
+        if not joined_date:
+            joined_date = datetime.now()
+        
+        earnings_per_click = 0.01
+        estimated_earnings = total_clicks * earnings_per_click
+        
+        await query.message.edit_text(
+            f"👤 **Profile Information**\n\n"
+            f"🆔 User ID: `{user_id}`\n"
+            f"👤 Name: {query.from_user.mention}\n"
+            f"📅 Joined: `{joined_date.strftime('%d/%m/%Y')}`\n\n"
+            f"💰 **Financial Summary**\n"
+            f"💵 Balance: `₹{balance:.2f}`\n"
+            f"💎 Estimated Earnings: `₹{estimated_earnings:.2f}`\n\n"
+            f"📊 **Statistics**\n"
+            f"🔗 Total Links: `{total_links}`\n"
+            f"👆 Total Clicks: `{total_clicks}`\n"
+            f"📈 Click Rate: `{(total_clicks/total_links*100):.1f}%`\n\n" if total_links > 0 else f"📈 Click Rate: `0%`\n\n"
+            f"🌐 **Settings**\n"
+            f"🔗 Shortener: `{shortner}`\n\n"
+            f">❤️‍🔥 By: @R2k_bots",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("💰 Balance", callback_data="check_balance"),
+                 InlineKeyboardButton("📊 Analytics", callback_data="analytics")],
+                [InlineKeyboardButton("❌ Close", callback_data="close")]
+            ])
+        )
+
+    elif query.data == "withdraw_history":
+        user_id = query.from_user.id
+        withdrawals = await tb.get_withdrawals(user_id, 10)
+        
+        if not withdrawals:
+            await query.message.edit_text(
+                "📋 **Withdrawal History**\n\n"
+                "❌ No withdrawal requests found!\n\n"
+                "💡 Start earning by sharing links!",
+                reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]])
             )
+            return
+        
+        history_text = "📋 **Withdrawal History** (Last 10)\n\n"
+        
+        for w in withdrawals:
+            status_emoji = {
+                'pending': '⏳',
+                'approved': '✅',
+                'completed': '💚',
+                'cancelled': '❌',
+                'rejected': '🚫'
+            }.get(w['status'], '❓')
             
-            # Store daily analytics
-            await self.analytics.update_one(
-                {'user_id': user_id, 'date': today},
-                {
-                    '$inc': {'clicks': clicks},
-                    '$set': {'updated_at': datetime.now()}
-                },
-                upsert=True
+            history_text += (
+                f"{status_emoji} **₹{w['amount']:.2f}** - {w['method']}\n"
+                f"📅 {w['created_at'].strftime('%d/%m/%Y %H:%M')}\n"
+                f"📊 Status: {w['status'].title()}\n\n"
             )
-        except Exception as e:
-            print("Error in add_link_click:", e)
+        
+        await query.message.edit_text(
+            history_text + ">❤️‍🔥 By: @R2k_bots",
+            reply_markup=InlineKeyboardMarkup([
+                [InlineKeyboardButton("💰 Balance", callback_data="check_balance"),
+                 InlineKeyboardButton("💸 Withdraw", callback_data="withdraw")],
+                [InlineKeyboardButton("❌ Close", callback_data="close")]
+            ])
+        )
 
-    async def add_link_created(self, user_id: int, count: int = 1):
-        try:
-            today = datetime.now().date()
-            await self.users.update_one(
-                {'user_id': user_id},
-                {
-                    '$inc': {
-                        'total_links': count,
-                        'today_links': count
-                    }
-                },
-                upsert=True
-            )
-            
-            # Store daily analytics
-            await self.analytics.update_one(
-                {'user_id': user_id, 'date': today},
-                {
-                    '$inc': {'links_created': count},
-                    '$set': {'updated_at': datetime.now()}
-                },
-                upsert=True
-            )
-        except Exception as e:
-            print("Error in add_link_created:", e)
-
-    async def get_analytics(self, user_id: int, period: str = "daily"):
-        try:
-            user = await self.users.find_one({'user_id': user_id})
-            if not user:
-                return None
-
-            if period == "daily":
-                return {
-                    'today_links': user.get('today_links', 0),
-                    'today_clicks': user.get('today_clicks', 0),
-                    'total_links': user.get('total_links', 0),
-                    'total_clicks': user.get('total_clicks', 0)
-                }
-            elif period == "weekly":
-                week_ago = datetime.now() - timedelta(days=7)
-                analytics = await self.analytics.find({
-                    'user_id': user_id,
-                    'date': {'$gte': week_ago.date()}
-                }).to_list(None)
-                
-                total_clicks = sum(item.get('clicks', 0) for item in analytics)
-                total_links = sum(item.get('links_created', 0) for item in analytics)
-                
-                return {
-                    'weekly_links': total_links,
-                    'weekly_clicks': total_clicks,
-                    'total_links': user.get('total_links', 0),
-                    'total_clicks': user.get('total_clicks', 0)
-                }
-            elif period == "monthly":
-                month_ago = datetime.now() - timedelta(days=30)
-                analytics = await self.analytics.find({
-                    'user_id': user_id,
-                    'date': {'$gte': month_ago.date()}
-                }).to_list(None)
-                
-                total_clicks = sum(item.get('clicks', 0) for item in analytics)
-                total_links = sum(item.get('links_created', 0) for item in analytics)
-                
-                return {
-                    'monthly_links': total_links,
-                    'monthly_clicks': total_clicks,
-                    'total_links': user.get('total_links', 0),
-                    'total_clicks': user.get('total_clicks', 0)
-                }
-        except Exception as e:
-            print("Error in get_analytics:", e)
-            return None
-
-    # Withdrawal methods
-    async def create_withdrawal(self, user_id: int, amount: float, method: str, details: str):
-        try:
-            withdrawal = {
-                'user_id': user_id,
-                'amount': amount,
-                'method': method,
-                'details': details,
-                'status': 'pending',
-                'created_at': datetime.now(),
-                'updated_at': datetime.now()
-            }
-            result = await self.withdrawals.insert_one(withdrawal)
-            
-            # Deduct from user balance
-            await self.users.update_one(
-                {'user_id': user_id},
-                {'$inc': {'balance': -amount}}
-            )
-            
-            return str(result.inserted_id)
-        except Exception as e:
-            print("Error in create_withdrawal:", e)
-            return None
-
-    async def get_withdrawals(self, user_id: int, limit: int = 10):
-        try:
-            withdrawals = await self.withdrawals.find(
-                {'user_id': user_id}
-            ).sort('created_at', -1).limit(limit).to_list(None)
-            return withdrawals
-        except Exception as e:
-            print("Error in get_withdrawals:", e)
-            return []
-
-    async def update_withdrawal_status(self, withdrawal_id: str, status: str):
-        try:
+    # Admin withdrawal management callbacks
+    elif query.data.startswith("approve_") and query.from_user.id == ADMIN:
+        withdrawal_id = query.data.split("_")[1]
+        success = await tb.update_withdrawal_status(withdrawal_id, "approved")
+        
+        if success:
+            # Get withdrawal details to notify user
             from bson import ObjectId
-            result = await self.withdrawals.update_one(
-                {'_id': ObjectId(withdrawal_id)},
-                {
-                    '$set': {
-                        'status': status,
-                        'updated_at': datetime.now()
-                    }
-                }
+            withdrawal = await tb.withdrawals.find_one({'_id': ObjectId(withdrawal_id)})
+            if withdrawal:
+                await send_withdrawal_notification(
+                    query.bot, 
+                    withdrawal['user_id'], 
+                    withdrawal_id, 
+                    "approved", 
+                    withdrawal['amount']
+                )
+            
+            await query.message.edit_text(
+                f"✅ **Withdrawal Approved**\n\n"
+                f"🆔 Request ID: `{withdrawal_id}`\n"
+                f"📧 User has been notified.",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("✅ Mark Completed", callback_data=f"complete_{withdrawal_id}")],
+                    [InlineKeyboardButton("📋 All Requests", callback_data="all_withdrawals")]
+                ])
             )
-            return result.modified_count > 0
-        except Exception as e:
-            print("Error in update_withdrawal_status:", e)
-            return False
+        else:
+            await query.answer("❌ Failed to approve withdrawal!", show_alert=True)
 
-    async def check_min_withdraw_threshold(self, user_id: int):
-        try:
-            user = await self.users.find_one({'user_id': user_id})
-            if user:
-                balance = user.get('balance', 0.0)
-                min_withdraw = user.get('min_withdraw', 5.0)
-                return balance >= min_withdraw
-            return False
-        except Exception as e:
-            print("Error in check_min_withdraw_threshold:", e)
-            return False
+    elif query.data.startswith("reject_") and query.from_user.id == ADMIN:
+        withdrawal_id = query.data.split("_")[1]
+        
+        # Get withdrawal details to refund user
+        from bson import ObjectId
+        withdrawal = await tb.withdrawals.find_one({'_id': ObjectId(withdrawal_id)})
+        if withdrawal:
+            # Refund the amount
+            await tb.add_balance(withdrawal['user_id'], withdrawal['amount'])
+            
+            success = await tb.update_withdrawal_status(withdrawal_id, "rejected")
+            
+            if success:
+                await send_withdrawal_notification(
+                    query.bot, 
+                    withdrawal['user_id'], 
+                    withdrawal_id, 
+                    "rejected", 
+                    withdrawal['amount']
+                )
+                
+                await query.message.edit_text(
+                    f"🚫 **Withdrawal Rejected**\n\n"
+                    f"🆔 Request ID: `{withdrawal_id}`\n"
+                    f"💰 Amount refunded to user balance\n"
+                    f"📧 User has been notified.",
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton("📋 All Requests", callback_data="all_withdrawals")]
+                    ])
+                )
+            else:
+                await query.answer("❌ Failed to reject withdrawal!", show_alert=True)
 
-tb = Techifybots()
+    elif query.data.startswith("complete_") and query.from_user.id == ADMIN:
+        withdrawal_id = query.data.split("_")[1]
+        success = await tb.update_withdrawal_status(withdrawal_id, "completed")
+        
+        if success:
+            # Get withdrawal details to notify user
+            from bson import ObjectId
+            withdrawal = await tb.withdrawals.find_one({'_id': ObjectId(withdrawal_id)})
+            if withdrawal:
+                await send_withdrawal_notification(
+                    query.bot, 
+                    withdrawal['user_id'], 
+                    withdrawal_id, 
+                    "completed", 
+                    withdrawal['amount']
+                )
+            
+            await query.message.edit_text(
+                f"💚 **Withdrawal Completed**\n\n"
+                f"🆔 Request ID: `{withdrawal_id}`\n"
+                f"📧 User has been notified.",
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton("📋 All Requests", callback_data="all_withdrawals")]
+                ])
+            )
+        else:
+            await query.answer("❌ Failed to complete withdrawal!", show_alert=True)
