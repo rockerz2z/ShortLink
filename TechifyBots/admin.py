@@ -5,6 +5,8 @@ import asyncio
 import re
 from config import ADMIN
 from .db import tb
+from datetime import datetime
+from config import WITHDRAWAL_NOTIFICATION_CHANNEL
 
 def parse_button_markup(text: str):
     lines = text.split("\n")
@@ -32,7 +34,12 @@ def parse_button_markup(text: str):
 async def total_users(client, message):
     try:
         users = await tb.get_all_users()
-        await message.reply(f"👥 **Total Users:** {len(users)}",reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🎭 Close", callback_data="close")]]))
+        pending_withdrawals_count = await tb.withdrawals.count_documents({"status": "pending"})
+        await message.reply(
+            f"👥 **Total Users:** {len(users)}\n\n"
+            f"💰 **Pending Withdrawals:** {pending_withdrawals_count}",
+            reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("🎭 Close", callback_data="close")]])
+        )
     except Exception as e:
         r=await message.reply(f"❌ *Error:* `{str(e)}`")
         await asyncio.sleep(30)
@@ -79,7 +86,6 @@ async def broadcasting_func(client: Client, message: Message):
                 failed += 1
         except Exception as e:
             print(f"Broadcast to {user_id} failed: {e}")
-            failed += 1
 
         await msg.edit(f"Total: {i + 1}\nCompleted: {completed}\nFailed: {failed}")
         await asyncio.sleep(0.1)
@@ -162,178 +168,81 @@ async def banlist(client, message):
         await response.edit(text)
     except Exception as e:
         await response.edit(f"<b>Error:</b> <code>{str(e)}</code>")
-from pyrogram import Client, filters
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup, Message
-from config import ADMIN
-from .db import tb
-from .notifications import send_withdrawal_notification
 
-@Client.on_message(filters.command("withdrawals") & filters.user(ADMIN))
-async def view_withdrawals(c, m: Message):
-    """View all pending withdrawal requests"""
+# New admin commands for withdrawal management
+@Client.on_message(filters.command("viewwithdrawals") & filters.private & filters.user(ADMIN))
+async def view_withdrawals(c, m):
     try:
-        # Get pending withdrawals
-        pending_withdrawals = await tb.withdrawals.find(
-            {'status': 'pending'}
-        ).sort('created_at', -1).limit(10).to_list(None)
-        
+        pending_withdrawals = await tb.withdrawals.find({"status": "pending"}).to_list(length=None)
         if not pending_withdrawals:
-            return await m.reply_text(
-                "📋 **Withdrawal Requests**\n\n"
-                "✅ No pending withdrawal requests!"
-            )
+            return await m.reply("<b>No pending withdrawal requests.</b>")
         
-        requests_text = "📋 **Pending Withdrawal Requests**\n\n"
+        msg = "<b>💰 Pending Withdrawal Requests:</b>\n\n"
+        for req in pending_withdrawals:
+            user_info = await c.get_users(req["user_id"])
+            msg += f"ID: `{req['_id']}`\n"
+            msg += f"User: {user_info.mention} (`{req['user_id']}`)\n"
+            msg += f"Amount: `{req['amount']}`\n"
+            msg += f"Method: `{req['method']}`\n"
+            msg += f"Date: `{req['timestamp'].strftime('%Y-%m-%d %H:%M')}`\n\n"
         
-        for i, withdrawal in enumerate(pending_withdrawals, 1):
-            requests_text += (
-                f"**{i}. Request #{str(withdrawal['_id'])}**\n"
-                f"👤 User ID: `{withdrawal['user_id']}`\n"
-                f"💰 Amount: `₹{withdrawal['amount']:.2f}`\n"
-                f"🏦 Method: `{withdrawal['method']}`\n"
-                f"📋 Details: `{withdrawal['details']}`\n"
-                f"📅 Date: `{withdrawal['created_at'].strftime('%d/%m/%Y %H:%M')}`\n\n"
-            )
-        
-        keyboard = []
-        for withdrawal in pending_withdrawals[:5]:  # Show buttons for first 5
-            withdrawal_id = str(withdrawal['_id'])
-            keyboard.append([
-                InlineKeyboardButton(
-                    f"✅ Approve #{withdrawal_id[:8]}", 
-                    callback_data=f"approve_{withdrawal_id}"
-                ),
-                InlineKeyboardButton(
-                    f"❌ Reject #{withdrawal_id[:8]}", 
-                    callback_data=f"reject_{withdrawal_id}"
-                )
-            ])
-        
-        keyboard.append([InlineKeyboardButton("🔄 Refresh", callback_data="all_withdrawals")])
-        
-        await m.reply_text(
-            requests_text,
-            reply_markup=InlineKeyboardMarkup(keyboard)
-        )
-        
+        await m.reply(msg)
     except Exception as e:
-        await m.reply_text(f"❌ Error fetching withdrawals: {e}")
+        await m.reply(f"Error fetching withdrawals: {str(e)}")
 
-@Client.on_message(filters.command("withdrawal_stats") & filters.user(ADMIN))
-async def withdrawal_stats(c, m: Message):
-    """Get withdrawal statistics"""
+@Client.on_message(filters.command("approvewithdraw") & filters.private & filters.user(ADMIN))
+async def approve_withdrawal(c, m):
     try:
-        # Get stats from database
-        from datetime import datetime, timedelta
+        req_id = m.text.split(maxsplit=1)[1]
         
-        today = datetime.now().date()
-        week_ago = datetime.now() - timedelta(days=7)
-        month_ago = datetime.now() - timedelta(days=30)
-        
-        # Count withdrawals by status
-        total_pending = await tb.withdrawals.count_documents({'status': 'pending'})
-        total_approved = await tb.withdrawals.count_documents({'status': 'approved'})
-        total_completed = await tb.withdrawals.count_documents({'status': 'completed'})
-        total_rejected = await tb.withdrawals.count_documents({'status': 'rejected'})
-        
-        # Amount statistics
-        pipeline = [
-            {'$group': {
-                '_id': '$status',
-                'total_amount': {'$sum': '$amount'},
-                'count': {'$sum': 1}
-            }}
-        ]
-        
-        amount_stats = {}
-        async for result in tb.withdrawals.aggregate(pipeline):
-            amount_stats[result['_id']] = {
-                'amount': result['total_amount'],
-                'count': result['count']
-            }
-        
-        # Today's statistics
-        today_withdrawals = await tb.withdrawals.count_documents({
-            'created_at': {'$gte': datetime.combine(today, datetime.min.time())}
-        })
-        
-        stats_text = (
-            f"📊 **Withdrawal Statistics**\n\n"
-            f"📋 **Status Overview**\n"
-            f"⏳ Pending: {total_pending}\n"
-            f"✅ Approved: {total_approved}\n"
-            f"💚 Completed: {total_completed}\n"
-            f"🚫 Rejected: {total_rejected}\n\n"
-            f"💰 **Amount Statistics**\n"
+        result = await tb.withdrawals.update_one(
+            {"_id": ObjectId(req_id), "status": "pending"},
+            {"$set": {"status": "approved", "processed_date": datetime.now()}}
         )
         
-        for status, data in amount_stats.items():
-            stats_text += f"{status.title()}: ₹{data['amount']:.2f} ({data['count']} requests)\n"
-        
-        stats_text += f"\n📅 **Today's Requests:** {today_withdrawals}"
-        
-        await m.reply_text(
-            stats_text,
-            reply_markup=InlineKeyboardMarkup([
-                [InlineKeyboardButton("📋 View Pending", callback_data="all_withdrawals")],
-                [InlineKeyboardButton("🔄 Refresh", callback_data="withdrawal_stats")]
-            ])
-        )
-        
+        if result.modified_count == 1:
+            withdrawal_req = await tb.withdrawals.find_one({"_id": ObjectId(req_id)})
+            user_id = withdrawal_req["user_id"]
+            await m.reply(f"✅ Withdrawal request `{req_id}` approved. Notifying user...")
+            try:
+                await c.send_message(user_id, f"✅ Your withdrawal request for `{withdrawal_req['amount']}` has been **approved**.")
+            except:
+                pass
+        else:
+            await m.reply("❌ Failed to approve. Request not found or not pending.")
     except Exception as e:
-        await m.reply_text(f"❌ Error fetching stats: {e}")
+        await m.reply(f"Error approving withdrawal: {str(e)}")
 
-@Client.on_message(filters.command("add_balance") & filters.user(ADMIN))
-async def add_balance_admin(c, m: Message):
-    """Add balance to user account"""
-    args = m.text.split()
-    
-    if len(args) < 3:
-        return await m.reply_text(
-            "❌ **Invalid Format**\n\n"
-            "Use: `/add_balance <user_id> <amount>`\n"
-            "Example: `/add_balance 123456789 10.50`"
-        )
-    
+@Client.on_message(filters.command("rejectwithdraw") & filters.private & filters.user(ADMIN))
+async def reject_withdrawal(c, m):
     try:
-        user_id = int(args[1])
-        amount = float(args[2])
+        command_parts = m.text.split(maxsplit=2)
+        if len(command_parts) < 3:
+            return await m.reply("Usage: /rejectwithdraw [request_id] [reason]")
         
-        if amount <= 0:
-            return await m.reply_text("❌ Amount must be positive!")
+        req_id = command_parts[1]
+        reason = command_parts[2]
         
-        # Check if user exists
-        user = await tb.get_user(user_id)
-        if not user:
-            return await m.reply_text("❌ User not found!")
+        withdrawal_req = await tb.withdrawals.find_one({"_id": ObjectId(req_id), "status": "pending"})
+        if not withdrawal_req:
+            return await m.reply("❌ Request not found or not pending.")
         
-        # Add balance
-        await tb.add_balance(user_id, amount)
-        new_balance = await tb.get_balance(user_id)
-        
-        # Notify user
-        try:
-            await c.send_message(
-                user_id,
-                f"💰 **Balance Added**\n\n"
-                f"💵 Amount Added: `₹{amount:.2f}`\n"
-                f"💎 New Balance: `₹{new_balance:.2f}`\n\n"
-                f"🎉 Congratulations! Your balance has been updated.\n\n"
-                f">❤️‍🔥 By: @R2k_bots"
-            )
-            notification_status = "✅ User notified"
-        except Exception:
-            notification_status = "❌ Failed to notify user"
-        
-        await m.reply_text(
-            f"✅ **Balance Added Successfully**\n\n"
-            f"👤 User ID: `{user_id}`\n"
-            f"💵 Amount Added: `₹{amount:.2f}`\n"
-            f"💎 New Balance: `₹{new_balance:.2f}`\n\n"
-            f"📧 {notification_status}"
+        result = await tb.withdrawals.update_one(
+            {"_id": ObjectId(req_id)},
+            {"$set": {"status": "rejected", "rejection_reason": reason, "processed_date": datetime.now()}}
         )
         
-    except ValueError:
-        await m.reply_text("❌ Invalid user ID or amount!")
+        if result.modified_count == 1:
+            user_id = withdrawal_req["user_id"]
+            # Refund the balance
+            await tb.update_user_balance(user_id, withdrawal_req["amount"])
+            
+            await m.reply(f"❌ Withdrawal request `{req_id}` rejected. Notifying user and refunding balance...")
+            try:
+                await c.send_message(user_id, f"❌ Your withdrawal request for `{withdrawal_req['amount']}` has been **rejected**.\nReason: `{reason}`\n\nYour balance has been refunded.")
+            except:
+                pass
+        else:
+            await m.reply("❌ Failed to reject. Request not found.")
     except Exception as e:
-        await m.reply_text(f"❌ Error adding balance: {e}")
+        await m.reply(f"Error rejecting withdrawal: {str(e)}")
