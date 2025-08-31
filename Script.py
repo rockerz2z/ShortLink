@@ -55,4 +55,4 @@ class text(object):
       "rejected": "❌ Your withdrawal request for `{amount}` has been **rejected**.\nReason: `{reason}`\n\nYour balance has been refunded.",
       "returned": "⚠️ Your withdrawal for `{amount}` has been **returned**.\nReason: `{reason}`"
   }
-}
+  
