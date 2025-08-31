@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from pytz import timezone
 from pyrogram import Client
 from aiohttp import web
-from config import API_ID, API_HASH, BOT_TOKEN, ADMIN, LOG_CHANNEL, WITHDRAW_THRESHOLD
+from config import API_ID, API_HASH, BOT_TOKEN, ADMIN, LOG_CHANNEL, WITHDRAW_THRESHOLD, ANALYTICS_CHANNEL
 import asyncio
 from TechifyBots.db import tb
 
