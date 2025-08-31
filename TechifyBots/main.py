@@ -1,178 +1,69 @@
 import asyncio
-import httpx
-import re
 from pyrogram import Client, filters
-from pyrogram.types import Message
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
+from TechifyBots.db import db
+from TechifyBots.shortener import shorten_text, shorten_bulk, shorten_forwarded
+from TechifyBots.notifications import start_scheduler
 
-from TechifyBots.db import get_user, save_user
+API_ID = 123456   # your Telegram API ID
+API_HASH = "your_api_hash"
+BOT_TOKEN = "your_bot_token"
 
-# ================ HELPERS =================
-async def api_request(domain: str, api_key: str, params: dict):
-    url = f"https://{domain}/api"
-    params["api"] = api_key
-    try:
-        async with httpx.AsyncClient(timeout=15) as client:
-            r = await client.get(url, params=params)
-            return r.json()
-    except Exception as e:
-        return {"status": "error", "message": str(e)}
+app = Client("shortlink-bot", api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# ================ COMMANDS =================
-async def start_cmd(client: Client, m: Message):
-    await m.reply_text(
-        "👋 Welcome!\n\n"
-        "Use /setapi <domain> <apikey> to connect your shortener account.\n"
-        "Example: /setapi touchurl.xyz myapikey"
+# Start Command
+@app.on_message(filters.command("start") & filters.private)
+async def start_cmd(client, message: Message):
+    keyboard = InlineKeyboardMarkup([
+        [InlineKeyboardButton("💰 Balance", callback_data="balance")],
+        [InlineKeyboardButton("💵 Withdraw", callback_data="withdraw")],
+        [InlineKeyboardButton("📜 Withdraw History", callback_data="history")],
+        [InlineKeyboardButton("👤 Profile Info", callback_data="profile")]
+    ])
+
+    await message.reply_text(
+        "👋 Welcome to the Link Shortener Bot!\n\n"
+        "Send me any link or post and I’ll shorten it.\n\n"
+        "Use the menu below to manage your account 👇",
+        reply_markup=keyboard
     )
+    db.add_user(message.from_user.id, message.from_user.first_name)
 
 
-async def setapi_cmd(client: Client, m: Message):
-    try:
-        _, domain, api_key = m.text.split(maxsplit=2)
-    except:
-        return await m.reply_text("Usage: /setapi <domain> <apikey>")
-    save_user(m.from_user.id, domain, api_key)
-    await m.reply_text(f"✅ API connected for {domain}")
+# Handle Normal Links
+@app.on_message(filters.text & filters.private & ~filters.forwarded)
+async def shortener_handler(client, message: Message):
+    url = message.text.strip()
+    short = await shorten_text(url, message.from_user.id)
+    await message.reply_text(f"🔗 Shortened Link:\n{short}")
 
 
-async def shorten_cmd(client: Client, m: Message):
-    user = get_user(m.from_user.id)
-    if not user:
-        return await m.reply_text("❌ Set your API first using /setapi")
-    try:
-        url = m.text.split(maxsplit=1)[1]
-    except:
-        return await m.reply_text("Usage: /shorten <url>")
-    if "t.me" in url or "telegram.me" in url:
-        return await m.reply_text("⏩ Skipped Telegram link")
-    domain, api_key, _ = user
-    data = await api_request(domain, api_key, {"url": url})
-    if data.get("status") == "success":
-        await m.reply_text(f"🔗 {data['shortenedUrl']}")
-    else:
-        await m.reply_text(f"❌ Error: {data.get('message')}")
+# Handle Bulk Links
+@app.on_message(filters.document & filters.private)
+async def bulk_handler(client, message: Message):
+    file = await message.download()
+    with open(file, "r") as f:
+        urls = f.read().splitlines()
+    short_links = await shorten_bulk(urls, message.from_user.id)
+    await message.reply_text("✅ Bulk Links Shortened:\n\n" + "\n".join(short_links))
 
 
-async def bulk_cmd(client: Client, m: Message):
-    user = get_user(m.from_user.id)
-    if not user:
-        return await m.reply_text("❌ Set your API first using /setapi")
-    try:
-        links = m.text.split(maxsplit=1)[1].splitlines()
-    except:
-        return await m.reply_text("Usage: /bulk <link1>\n<link2>\n...")
-    domain, api_key, _ = user
-    result = []
-    for link in links:
-        if "t.me" in link:
-            result.append(f"⏩ Skipped: {link}")
-            continue
-        data = await api_request(domain, api_key, {"url": link})
-        if data.get("status") == "success":
-            result.append(data['shortenedUrl'])
-        else:
-            result.append(f"❌ {link}")
-    await m.reply_text("\n".join(result))
+# Handle Forwarded Posts
+@app.on_message(filters.forwarded & filters.private)
+async def forward_handler(client, message: Message):
+    short_text = await shorten_forwarded(message, message.from_user.id)
+    await message.reply_text(short_text)
 
 
-async def forwarded_handler(client: Client, m: Message):
-    user = get_user(m.from_user.id)
-    if not user or not m.text:
-        return
-    domain, api_key, _ = user
-    urls = re.findall(r'https?://\S+', m.text)
-    if not urls:
-        return
-    result = []
-    for url in urls:
-        if "t.me" in url:
-            result.append(f"⏩ Skipped: {url}")
-            continue
-        data = await api_request(domain, api_key, {"url": url})
-        if data.get("status") == "success":
-            result.append(data['shortenedUrl'])
-        else:
-            result.append(f"❌ {url}")
-    await m.reply_text("\n".join(result))
+# Start Background Notifications
+@app.on_message(filters.command("run_scheduler") & filters.user([123456789]))
+async def run_scheduler(client, message: Message):
+    asyncio.create_task(start_scheduler(app))
+    await message.reply_text("⏰ Notification scheduler started.")
 
 
-async def balance_cmd(client: Client, m: Message):
-    user = get_user(m.from_user.id)
-    if not user:
-        return await m.reply_text("❌ Set your API first using /setapi")
-    domain, api_key, _ = user
-    data = await api_request(domain, api_key, {"type": "balance"})
-    await m.reply_text(str(data))
+# Import callback handlers
+from TechifyBots import callback
 
-
-async def profile_cmd(client: Client, m: Message):
-    user = get_user(m.from_user.id)
-    if not user:
-        return await m.reply_text("❌ Set your API first using /setapi")
-    domain, api_key, _ = user
-    data = await api_request(domain, api_key, {"type": "user"})
-    await m.reply_text(str(data))
-
-
-async def withdraw_cmd(client: Client, m: Message):
-    user = get_user(m.from_user.id)
-    if not user:
-        return await m.reply_text("❌ Set your API first using /setapi")
-    try:
-        amount = m.text.split(maxsplit=1)[1]
-    except:
-        return await m.reply_text("Usage: /withdraw <amount>")
-    domain, api_key, _ = user
-    data = await api_request(domain, api_key, {"type": "withdraw", "amount": amount})
-    await m.reply_text(str(data))
-
-
-async def withdraw_history_cmd(client: Client, m: Message):
-    user = get_user(m.from_user.id)
-    if not user:
-        return await m.reply_text("❌ Set your API first using /setapi")
-    domain, api_key, _ = user
-    data = await api_request(domain, api_key, {"type": "withdraw_history"})
-    await m.reply_text(str(data))
-
-
-async def stats_cmd(client: Client, m: Message):
-    user = get_user(m.from_user.id)
-    if not user:
-        return await m.reply_text("❌ Set your API first using /setapi")
-    try:
-        period = m.text.split(maxsplit=1)[1]
-    except:
-        return await m.reply_text("Usage: /stats <daily|weekly|monthly>")
-    domain, api_key, _ = user
-    data = await api_request(domain, api_key, {"type": "stats", "period": period})
-    await m.reply_text(str(data))
-
-
-# =========== Notifications & Reminders ===========
-async def notify_withdrawals(app: Client):
-    while True:
-        users = get_user("all")
-        for u in users:
-            user_id, domain, api_key, threshold = u
-            bal = await api_request(domain, api_key, {"type": "balance"})
-            if isinstance(bal, dict) and float(bal.get("balance", 0)) >= threshold:
-                try:
-                    await app.send_message(user_id, f"💰 Your balance {bal['balance']} reached the threshold. Time to withdraw!")
-                except:
-                    pass
-        await asyncio.sleep(3600)  # check every hour
-
-
-# ================ REGISTER HANDLERS =================
-def register_handlers(app: Client):
-    app.add_handler(filters.command("start"), start_cmd)
-    app.add_handler(filters.command("setapi"), setapi_cmd)
-    app.add_handler(filters.command("shorten"), shorten_cmd)
-    app.add_handler(filters.command("bulk"), bulk_cmd)
-    app.add_handler(filters.forwarded, forwarded_handler)
-    app.add_handler(filters.command("balance"), balance_cmd)
-    app.add_handler(filters.command("profile"), profile_cmd)
-    app.add_handler(filters.command("withdraw"), withdraw_cmd)
-    app.add_handler(filters.command("withdraw_history"), withdraw_history_cmd)
-    app.add_handler(filters.command("stats"), stats_cmd)
+print("✅ Bot started...")
+app.run()
