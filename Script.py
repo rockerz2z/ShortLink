@@ -45,5 +45,14 @@ class text(object):
 <b>🕰️ 𝘞𝘪𝘵𝘩𝘥𝘳𝘢𝘸𝘢𝘭 𝘏𝘪𝘴𝘵𝘰𝘳𝘺:</b>
 ◉ /withdrawhistory
 
-𝘖𝘯𝘤𝘦 𝘴𝘦𝘵, 𝘢𝘭𝘭 𝘭𝘪𝘯𝘬𝘴 𝘺𝘰𝘶 𝘴𝘦𝘯𝘥 𝘸𝘪𝘭𝘭 be 𝘢𝘶𝘵𝘰-𝘴𝘩𝘰𝘳𝘵𝘦𝘯𝘦𝘥 𝘸𝘪𝘵𝘩 𝘺𝘰𝘶𝘳 𝘤𝘩𝘰𝘴𝘦𝘯 𝘴𝘦𝘳𝘷𝘪𝘤𝘦.
+𝘖𝘯𝘤𝘦 𝘴𝘦𝘵, 𝘢𝘭𝘭 𝘭𝘪𝘯𝘬𝘴 𝘺𝘰𝘶 𝘴𝘦𝘯𝘥 𝘸𝘪𝘭𝘭 𝘣𝘦 𝘢𝘶𝘵𝘰-𝘴𝘩𝘰𝘳𝘵𝘦𝘯𝘦𝘥 𝘸𝘪𝘵𝘩 𝘺𝘰𝘶𝘳 𝘤𝘩𝘰𝘴𝘦𝘯 𝘴𝘦𝘳𝘷𝘪𝘤𝘦.
 𝘠𝘰𝘶 𝘤𝘢𝘯 𝘶𝘱𝘥𝘢𝘵𝘦 𝘺𝘰𝘶𝘳 𝘴𝘩𝘰𝘳𝘵𝘦𝘯𝘦𝘳 𝘢𝘯𝘺𝘵𝘪𝘮𝘦 𝘶𝘴𝘪𝘯𝘨 𝘵𝘩𝘦 𝘴𝘢𝘮𝘦 𝘤𝘰𝘮𝘮𝘢𝘯𝘥."""
+  
+  WITHDRAWAL_STATUS = {
+      "pending": "⏳ Your withdrawal request for `{amount}` has been submitted and is pending approval.",
+      "approved": "✅ Your withdrawal request for `{amount}` has been **approved**.",
+      "completed": "🎉 Your withdrawal for `{amount}` has been **completed**. Check your account!",
+      "rejected": "❌ Your withdrawal request for `{amount}` has been **rejected**.\nReason: `{reason}`\n\nYour balance has been refunded.",
+      "returned": "⚠️ Your withdrawal for `{amount}` has been **returned**.\nReason: `{reason}`"
+  }
+}
