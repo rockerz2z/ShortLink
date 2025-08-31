@@ -13,5 +13,10 @@ LOG_CHANNEL = int(os.environ.get("LOG_CHANNEL", "-1002884841659"))
 DB_URI = os.environ.get("DB_URI", "mongodb+srv://riyazahamed1806:d3corXDVXjrfS8NJ@cluster0.emcu0y2.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
 DB_NAME = os.environ.get("DB_NAME", "Shortlinks")
 
-IS_FSUB = os.environ.get("IS_FSUB", "True").lower() == "true"  # Set "True" For Enable Force Subscribe
-AUTH_CHANNELS = list(map(int, os.environ.get("AUTH_CHANNEL", "-1001957183140").split())) # Add Multiple channel ids
+IS_FSUB = os.environ.get("IS_FSUB", "True").lower() == "true"
+AUTH_CHANNELS = list(map(int, os.environ.get("AUTH_CHANNEL", "-1001957183140").split()))
+
+# New configuration variables for the requested features
+WITHDRAW_THRESHOLD = float(os.environ.get("WITHDRAW_THRESHOLD", "5.0"))
+WITHDRAWAL_NOTIFICATION_CHANNEL = int(os.environ.get("WITHDRAWAL_NOTIFICATION_CHANNEL", "-1002884841659"))
+ANALYTICS_CHANNEL = int(os.environ.get("ANALYTICS_CHANNEL", "-1002884841659"))
