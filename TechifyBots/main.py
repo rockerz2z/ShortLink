@@ -24,11 +24,9 @@ async def short_link(link, user_id):
 
     shortzy = Shortzy(api_key=uapi, base_site=usite)
 
-    # If input is a single link
     if link.startswith("http://") or link.startswith("https://"):
         return await shortzy.convert(link)
     else:
-        # If input contains multiple links in text
         return await shortzy.convert_from_text(link)
 
 async def save_data(tst_url, tst_api, user_id):
@@ -42,6 +40,38 @@ async def save_data(tst_url, tst_api, user_id):
         await tb.set_shortner(user_id=user_id, shortner=tst_url, api=tst_api)
         return True
     return False
+
+# Function to dynamically fetch balance based on the shortener
+async def fetch_api_balance(shortener_url, api_key):
+    try:
+        if "get2short.com" in shortener_url:
+            balance_api_url = f"https://get2short.com/api/user/balance?api={api_key}"
+            async with httpx.AsyncClient(timeout=30) as client_httpx:
+                response = await client_httpx.get(balance_api_url)
+                response.raise_for_status()
+                data = response.json()
+                if data.get("status") == "success":
+                    return float(data.get("balance", 0.0))
+                else:
+                    return None
+        elif "shorte.st" in shortener_url:
+            # Placeholder for shorte.st API. You would need to add the correct endpoint
+            # from their documentation to fetch the user's balance.
+            # Example:
+            # headers = {"public-api-token": api_key}
+            # balance_api_url = "https://api.shorte.st/v1/data/user/stats"
+            # ... and so on
+            return None # Not implemented for this example
+        elif "linkvertise.com" in shortener_url:
+            # Placeholder for Linkvertise API.
+            # ... and so on
+            return None # Not implemented for this example
+        else:
+            return None # Shortener not supported for balance feature
+            
+    except Exception as e:
+        print(f"Error fetching balance from API for {shortener_url}: {e}")
+        return None
 
 # ------------------ COMMAND HANDLERS ------------------
 
@@ -130,15 +160,29 @@ async def showinfo(c, m):
     usr = m.from_user
     site = await tb.get_value('shortner', user_id=usr.id)
     api = await tb.get_value('api', user_id=usr.id)
-    balance = await tb.get_user_balance(user_id=usr.id)
+    
+    if not site or not api:
+        return await m.reply_text("❌ You have not set a shortener yet. Use `/shortlink` to get started.")
 
-    await m.reply_text(
-        f"**Your Information**\n\n👤 User: {usr.mention}\n🆔 User ID: `{usr.id}`\n\n"
-        f"🌐 Connected Site: `{site}`\n🔗 Connected API: `{api}`\n\n"
-        f"💰 **Current Balance:** `{balance}`\n\n"
-        f">❤️‍🔥 By: @R2k_bots",
-        reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]])
+    website_balance = await fetch_api_balance(site, api)
+
+    msg = (
+        f"**Your Information**\n\n"
+        f"👤 User: {usr.mention}\n"
+        f"🆔 User ID: `{usr.id}`\n\n"
+        f"🌐 Connected Site: `{site}`\n"
+        f"🔗 Connected API: `{api}`\n\n"
     )
+
+    if website_balance is not None:
+        msg += f"💰 **Current Balance on Website:** `{website_balance}`\n\n"
+    else:
+        msg += "⚠️ **Balance:** Could not be fetched. Check your API key or contact support.\n\n"
+
+    msg += ">❤️‍🔥 By: @R2k_bots"
+    await m.reply_text(msg, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]])
+    )
+
 
 @Client.on_message(filters.command("tiny") & filters.private)
 async def tiny_handler(client, message):
@@ -185,8 +229,23 @@ async def show_balance(c, m):
         return await m.reply("**🚫 You are banned from using this bot**",
                              reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("Support", user_id=int(ADMIN))]]))
     
-    balance = await tb.get_user_balance(m.from_user.id)
-    await m.reply_text(f"💰 **Your Current Balance:** `{balance}`\n\n**Minimum Withdrawal Threshold:** `{WITHDRAW_THRESHOLD}`")
+    usr = m.from_user
+    site = await tb.get_value('shortner', user_id=usr.id)
+    api = await tb.get_value('api', user_id=usr.id)
+    
+    if not site or not api:
+        return await m.reply_text("❌ You have not set a shortener yet. Use `/shortlink` to get started.")
+
+    website_balance = await fetch_api_balance(site, api)
+    
+    if website_balance is not None:
+        await m.reply_text(
+            f"💰 **Your Current Balance on Website:** `{website_balance}`\n\n"
+            f"**Minimum Withdrawal Threshold:** `{WITHDRAW_THRESHOLD}`"
+        )
+    else:
+        await m.reply_text("❌ Could not fetch your balance. This shortener may not support the balance feature.")
+
 
 @Client.on_message(filters.command('withdraw') & filters.private)
 async def withdraw_command(c, m):
@@ -211,11 +270,9 @@ async def withdraw_command(c, m):
         if amount < WITHDRAW_THRESHOLD:
             return await m.reply_text(f"❌ Minimum withdrawal amount is {WITHDRAW_THRESHOLD}")
         
-        # Record the withdrawal request
         await tb.record_withdrawal_request(m.from_user.id, amount, payment_method)
         await tb.update_user_balance(m.from_user.id, -amount)
         
-        # Notify user and admin
         await m.reply_text("✅ Your withdrawal request has been submitted and is pending approval.")
         await c.send_message(WITHDRAWAL_NOTIFICATION_CHANNEL, f"New withdrawal request from user `{m.from_user.id}` for `{amount}` via `{payment_method}`.")
 
@@ -275,9 +332,6 @@ async def forwarded_link_handler(_, m):
     msg = "**✨ Your Short Link(s) are Ready!**\n\n" + "\n".join(shortened_urls)
     await m.reply_text(msg, reply_markup=InlineKeyboardMarkup([[InlineKeyboardButton("❌ Close", callback_data="close")]]))
     await tb.record_analytics(m.from_user.id, "links_shortened", {"count": len(urls)})
-
-
-# ------------------ AUTO SHORTEN TEXT HANDLER ------------------
 
 @Client.on_message(filters.text & filters.private & ~filters.command(["tiny", "stats", "broadcast", "balance", "withdraw", "withdrawhistory"]))
 async def shorten_link_handler(_, m):
