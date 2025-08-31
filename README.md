@@ -4,8 +4,6 @@
 
 <p align="center">🩷 Thanks for Being Here 🩷</p>
 
-
-
 ### 🥰 FEATURES
 
 <details><summary>Tap On Me For Bot Features</summary>
@@ -22,8 +20,16 @@
 - Maintenance Mode
 - Deploy on Heroku + Koyeb + Render + Railway.
 - [Developer support](https://telegram.me/TechifySupport) 24x7
+- **New Feature: Bulk Link Shortener**
+- **New Feature: Forwarded Post Shortener (with images)**
+- **New Feature: Balance Check from Bot**
+- **New Feature: Withdraw from Bot Account**
+- **New Feature: Profile info from Bot with Balance**
+- **New Feature: Daily/weekly/monthly analytics**
+- **New Feature: Withdraw History**
+- **New Feature: Bot auto send notifications of withdrawal (pending, approved, completed, cancel, returned)**
+- **New Feature: Bot automatically reminds to withdraw once minimum withdraw threshold reaches**
 </details>
-
 
 ### 🔥 VARIABLES
 
@@ -35,35 +41,14 @@
 - `ADMIN` : Your Telegram User ID
 - `PICS` - Your bot start images (you can add multiple images)
 - `DB_URI` : MongoDB Database get from [here](https://youtu.be/j8LIuM7vv18)
+- `DB_NAME` : MongoDB Database name.
 - `LOG_CHANNEL` : Your Log channel ID.
 - `AUTH_CHANNELS` : Your FSUB channel ID.
+- `WITHDRAW_THRESHOLD` : Minimum balance required to request a withdrawal.
+- `WITHDRAWAL_NOTIFICATION_CHANNEL` : Channel for admin withdrawal notifications.
+- `ANALYTICS_CHANNEL` : Channel for analytics reports.
 </details>
 
 ### 😍 COMMANDS
 
 <b><details><summary>Tap On Me For Commands</summary>
-```
-start - Check Bot Alive or no.
-stats - Check bot stats.
-shortlink - To connect your custom shortener.
-info - To check your info.
-ban - To ban users.
-unban - To unban users.
-banlist - To check banned users list.
-maintenance - Toggle maintenance mode
-broadcast - Broadcast Massage Send All Users In Bot.
-tiny - To short url using tiny
-```
-</details>
-
-### 💞 CREDIT
-
-- [TechifyBots](https://github.com/TechifyBots)
-
-### 😇 [SUPPORT](https://techifybots.github.io/PayWeb)
-
-### 🥳 [DEVELOPER](https://www.instagram.com/TechifyRahul/)
-
-### 📌 NOTE
-
-𝘊𝘰𝘱𝘺𝘪𝘯𝘨 𝘰𝘳 𝘚𝘦𝘭𝘭𝘪𝘯𝘨 𝘵𝘩𝘪𝘴 𝘳𝘦𝘱𝘰 𝘪𝘴 𝘴𝘵𝘳𝘪𝘤𝘵𝘭𝘺 𝘱𝘳𝘰𝘩𝘪𝘣𝘪𝘵𝘦𝘥.</b>
