@@ -25,7 +25,7 @@ def run_flask():
 def keep_alive():
     """Pings the web server to keep the service alive."""
     # !!! IMPORTANT: Replace this with your own app's public URL !!!
-    url = 'https://your-app-name.onrender.com' 
+    url = 'https://competent-bunnie-r2k-f0a65c81.koyeb.app' 
     while True:
         try:
             res = requests.get(url, timeout=15)
