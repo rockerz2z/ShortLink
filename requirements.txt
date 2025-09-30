@@ -11,3 +11,7 @@ Jinja2
 werkzeug
 itsdangerous
 aiohttp
+# requirements.txt
+
+Flask>=2.3
+requests
