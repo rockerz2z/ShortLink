@@ -1,17 +1,16 @@
-pyrofork>=2.3.68
-pytz
-TgCrypto
-shortzy
-motor
-requests
-httpx
-Flask
-gunicorn
-Jinja2
-werkzeug
-itsdangerous
-aiohttp
 # requirements.txt
 
-Flask>=2.3
+# For the bot
+pyrofork>=2.3.68
+TgCrypto
+pytz
+shortzy
+
+# For the database
+motor
+
+# For the web server and keep-alive
+Flask
+gunicorn
 requests
+httpx
